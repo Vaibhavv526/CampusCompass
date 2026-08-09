@@ -1,4 +1,7 @@
 # Python
+
+# Local Python virtual environment
+myvenv/
 __pycache__/
 *.py[cod]
 *$py.class
