@@ -114,19 +114,24 @@ class AssessmentAgent:
 
         if isinstance(recommendations, dict):
             recommendations = [recommendations]
-
+        ###
         for item in recommendations:
-            
+
+            description = item.get(
+                "description",
+                item.get("task", "")
+            )
+
+            if not description:
+                description = item.get("title", "")
+
             timeline = item.get("timeline", "")
 
             if timeline is not None:
                 timeline = str(timeline)
 
             normalized_recommendations.append({
-                "description": item.get(
-                    "description",
-                    item.get("task", "")
-                ),
+                "description": str(description),
                 "timeline": timeline,
             })
 
@@ -169,7 +174,8 @@ Return the assessment using the required structured output schema.
 
         if response.content is None:
             raise RuntimeError("Assessment agent returned an empty response.")
-        print("RAW:", repr(response.content))
+        print("RAW LLM RESPONSE:")
+        print(repr(response.content))
         
         try:
             content = response.content.strip()
