@@ -44,19 +44,24 @@ class AssessmentAgent:
     student: StudentProfile,
 ) -> dict[str, Any]:
         """Normalize flexible LLM JSON into our application schema."""
-
+        ###
         summary = data.get("summary", {})
 
-        if isinstance(summary, str):
-            summary = {
-                "student_name": student.name,
-                "degree": student.degree,
-                "branch": student.branch,
-                "current_year": student.current_year,
-                "semester": student.semester,
-                "career_goal": student.career_goal,
-                "weekly_study_hours": student.weekly_hours,
-            }
+        if isinstance(summary, str) or not isinstance(summary, dict):
+            summary = {}
+
+        summary = {
+            "student_name": summary.get("student_name", summary.get("name", student.name)),
+            "degree": summary.get("degree", student.degree),
+            "branch": summary.get("branch", student.branch),
+            "current_year": summary.get("current_year", student.current_year),
+            "semester": summary.get("semester", student.semester),
+            "career_goal": summary.get("career_goal", student.career_goal),
+            "weekly_study_hours": summary.get(
+                "weekly_study_hours",
+                student.weekly_hours,
+            ),
+        }
         
         normalized_gaps = []
 
@@ -68,10 +73,18 @@ class AssessmentAgent:
 
         for skill in student.skills:
             item = llm_gaps.get(skill.name.strip().lower(), {})
+            ##
+            priority = item.get("priority")
 
-            priority = item.get("priority", "medium")
+            if priority is None:
+                if skill.gap >= 40:
+                    priority = "high"
+                elif skill.gap >= 25:
+                    priority = "medium"
+                else:
+                    priority = "low"
 
-            if isinstance(priority, int):
+            elif isinstance(priority, int):
                 priority = {
                     1: "high",
                     2: "medium",
