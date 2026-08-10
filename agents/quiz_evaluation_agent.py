@@ -268,14 +268,21 @@ Return only valid JSON.
             else 0.0
         )
 
-        # Keep weak-topic analysis and recommendation from the LLM,
-        # but use our authoritative score and question results.
+        #
+        # Derive weak topics from actual incorrect answers.
+        # Never trust the LLM to report a weakness when all answers
+        # were answered correctly.
+        if correct_answers == total_questions:
+            weak_topics = []
+        else:
+            weak_topics = result.weak_topics
+
         return QuizEvaluationResponse(
             topic=quiz.topic,
             total_questions=total_questions,
             correct_answers=correct_answers,
             score_percentage=score_percentage,
             question_results=question_results,
-            weak_topics=result.weak_topics,
+            weak_topics=weak_topics,
             recommendation=result.recommendation,
         )

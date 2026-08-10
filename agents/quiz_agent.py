@@ -10,6 +10,7 @@ class QuizAgent:
         self,
         model_name: str = "llama-3.1-8b-instant",
     ):  ##
+        self.model_name = model_name
         self.agent = Agent(
             model=Groq(
                 id=model_name,
@@ -233,31 +234,63 @@ Requirements:
                     f"Question {index} has "
                     f"{len(question.options)} options; expected 4."
                 )
-
+            ##
             if question.correct_answer not in question.options:
+                # Try a case-insensitive match first.
+                normalized_answer = question.correct_answer.strip().lower()
+
+                matched_option = next(
+                    (
+                        option
+                        for option in question.options
+                        if option.strip().lower() == normalized_answer
+                    ),
+                    None,
+                )
+
+                if matched_option is not None:
+                    question.correct_answer = matched_option
+                    continue
+
+                # Ask the model to select one of the existing options.
                 repair_prompt = f"""
-        The following quiz question has an invalid correct_answer.
+    The following quiz question has an invalid correct answer.
 
-        The correct_answer MUST exactly match one of the four options.
+    Question:
+    {question.question}
 
-        Question:
-        {question.question}
+    Options:
+    {json.dumps(question.options, indent=2)}
 
-        Options:
-        {json.dumps(question.options, indent=2)}
+    Current correct answer:
+    {question.correct_answer}
 
-        Current correct_answer:
-        {question.correct_answer}
+    Choose the option that is correct.
 
-        Fix ONLY the correct_answer.
+    IMPORTANT:
+    - Return ONLY the exact text of ONE option.
+    - Copy the option exactly.
+    - Do not explain your answer.
+    - Do not add punctuation.
+    - Do not use markdown.
+    """
+                ##
+                repair_agent = Agent(
+                    model=Groq(
+                        id=self.model_name,
+                        temperature=0,
+                    ),
+                    system_prompt=(
+                        "You select the correct answer from provided options. "
+                        "Return ONLY the exact text of one option. "
+                        "Do not return JSON. "
+                        "Do not explain your answer. "
+                        "Do not add punctuation or markdown."
+                    ),
+                    structured_outputs=False,
+                )
 
-        Return ONLY the exact text of one option.
-        Do not return JSON.
-        Do not return an explanation.
-        Do not add punctuation.
-        """
-
-                repair_response = self.agent.run(repair_prompt)
+                repair_response = repair_agent.run(repair_prompt)
 
                 if repair_response.content is None:
                     raise RuntimeError(
@@ -266,17 +299,33 @@ Requirements:
 
                 repaired_answer = repair_response.content.strip()
 
-                # Remove accidental markdown/code formatting.
-                repaired_answer = repaired_answer.replace(
-                    "```", ""
-                ).strip()
+                # Remove accidental markdown formatting.
+                repaired_answer = repaired_answer.replace("```", "").strip()
 
-                if repaired_answer not in question.options:
-                    raise RuntimeError(
-                        f"Question {index} has a correct_answer "
-                        "that does not match any option, even after repair."
-                    )
+                # Exact match.
+                if repaired_answer in question.options:
+                    question.correct_answer = repaired_answer
+                    continue
 
-                question.correct_answer = repaired_answer
+                # Case-insensitive match.
+                repaired_normalized = repaired_answer.lower()
+
+                matched_option = next(
+                    (
+                        option
+                        for option in question.options
+                        if option.strip().lower() == repaired_normalized
+                    ),
+                    None,
+                )
+
+                if matched_option is not None:
+                    question.correct_answer = matched_option
+                    continue
+
+                raise RuntimeError(
+                    f"Question {index} has a correct_answer "
+                    "that does not match any option, even after repair."
+                )
 
         return result
