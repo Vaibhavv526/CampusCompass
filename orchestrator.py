@@ -42,6 +42,37 @@ class StudentMentorOrchestrator:
             quiz=quiz,
             student_answers=student_answers,
         )
+    def assess_student(self):
+        """Assess the student's current skills and learning gaps."""
+
+        return self.assessment_agent.assess(
+            student=self.student
+        )
+
+
+    def generate_roadmap(self, assessment):
+        """Generate a personalized learning roadmap."""
+
+        return self.roadmap_agent.create(
+            student=self.student,
+            assessment=assessment,
+        )
+
+    def get_recommendations(self):
+        """Generate personalized recommendations for the student."""
+
+        return self.recommendation_agent.recommend(
+            student=self.student
+        )
+
+    def ask_tutor(self, question: str):
+        """Get a personalized explanation from the tutor."""
+
+        return self.tutor_agent.teach(
+            student=self.student,
+            topic=self.topic,
+            question=question,
+        )
 
     def _get_knowledge_level(self) -> str:
         """Infer a basic knowledge level from the student's skills."""
