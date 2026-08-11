@@ -5,6 +5,7 @@ load_dotenv()
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.routes.auth import router as auth_router
 from backend.routes.recommendation import router as recommendation_router
 from backend.routes.quiz import router as quiz_router
 from backend.routes.tutor import router as tutor_router
@@ -44,3 +45,4 @@ app.include_router(tutor_router)
 app.include_router(quiz_router)
 app.include_router(recommendation_router)
 app.include_router(skill_analysis_router)
+app.include_router(auth_router)

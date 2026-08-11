@@ -10,6 +10,7 @@ import {
 import { Routes, Route, useNavigate } from "react-router-dom";
 import AssessmentPage from "./pages/AssessmentPage";
 import RoadmapPage from "./pages/RoadmapPage";
+import TutorPage from "./pages/TutorPage";
 
 function App() {
   const [apiStatus, setApiStatus] = useState("Checking backend...");
@@ -25,6 +26,7 @@ function App() {
     ? JSON.parse(savedSkillAnalysis)
     : null;
 });
+  const [showAssessmentPopup, setShowAssessmentPopup] = useState(false);
   const [assessmentLoading, setAssessmentLoading] = useState(false);
   const [assessmentError, setAssessmentError] = useState("");
   const [roadmap, setRoadmap] = useState(null);
@@ -81,7 +83,9 @@ function App() {
     const result = await generateAssessment(student);
 
     setAssessment(result);
+    setAssessment(result);
     localStorage.setItem("assessment", JSON.stringify(result));
+    setShowAssessmentPopup(true);
 
   } catch (error) {
     setAssessmentError(error.message);
@@ -134,7 +138,7 @@ const handleRoadmap = async () => {
       </header>
 
       <main className="dashboard">
-        {assessment && (
+        {showAssessmentPopup && assessment && (
           <div className="analysis-popup-overlay">
             <div className="analysis-popup">
               <div className="analysis-popup-icon">🎉</div>
@@ -149,7 +153,7 @@ const handleRoadmap = async () => {
                 onClick={() => {
                   const assessmentData = assessment;
 
-                  setAssessment(null);
+                  setShowAssessmentPopup(false);
 
                   navigate("/assessment", {
                     state: {
@@ -164,7 +168,7 @@ const handleRoadmap = async () => {
 
               <button
                 className="popup-secondary-button"
-                onClick={() => setAssessment(null)}
+                onClick={() => setShowAssessmentPopup(false)}
               >
                 Continue Dashboard
               </button>
@@ -217,6 +221,20 @@ const handleRoadmap = async () => {
         </section>
 
         <section className="dashboard-grid">
+           <div className="dashboard-card">
+            <h3>📊 Assessment</h3>
+
+            <p>
+              Analyze your current skills and identify learning gaps.
+            </p>
+
+            <button
+              onClick={handleAssessment}
+              disabled={assessmentLoading}
+            >
+              {assessmentLoading ? "Generating..." : "Start Assessment"}
+            </button>
+          </div>
           <div className="dashboard-card">
             <h3>🧠 Skill Analysis</h3>
 
@@ -233,19 +251,6 @@ const handleRoadmap = async () => {
           </div>
 
           <div className="dashboard-card">
-            <h3>🧠 Skill Analysis</h3>
-
-            <p>
-              Analyze your technical skills, identify strengths and weaknesses,
-              and get personalized improvement steps.
-            </p>
-
-            <button onClick={() => navigate("/skill-analysis")}>
-              Analyze Skills
-            </button>
-          </div>
-
-          <div className="dashboard-card">
             <h3>🗺️ Learning Roadmap</h3>
             <p>Generate a personalized roadmap toward your career goal.</p>
             <button onClick={handleRoadmap} disabled={roadmapLoading}>
@@ -256,7 +261,9 @@ const handleRoadmap = async () => {
           <div className="dashboard-card">
             <h3>🤖 AI Tutor</h3>
             <p>Ask questions and get personalized explanations.</p>
-            <button>Ask Tutor</button>
+            <button onClick={() => navigate("/tutor")}>
+              Ask Tutor
+            </button>
           </div>
 
           <div className="dashboard-card">
@@ -287,6 +294,7 @@ const handleRoadmap = async () => {
 
     <Route path="/assessment" element={<AssessmentPage />} />
     <Route path="/roadmap" element={<RoadmapPage />} />
+    <Route path="/tutor" element={<TutorPage />} />
     <Route
       path="/skill-analysis"
       element={<SkillAnalysisPage />}

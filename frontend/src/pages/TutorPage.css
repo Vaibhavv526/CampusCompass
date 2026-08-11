@@ -1,0 +1,158 @@
+.tutor-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 24px;
+}
+
+.back-button {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.tutor-header {
+  max-width: 900px;
+  margin: 0 auto 30px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.tutor-icon {
+  font-size: 28px;
+  background: #eef4ff;
+  border-radius: 50%;
+  padding: 10px;
+}
+
+.tutor-header h1 {
+  margin: 6px 0;
+  font-size: 32px;
+  color: #111827;
+}
+
+.tutor-subtitle {
+  color: #64748b;
+  line-height: 1.6;
+  max-width: 700px;
+}
+
+.eyebrow {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.tutor-input-card,
+.tutor-results {
+  max-width: 900px;
+  margin: 0 auto 30px;
+  background: white;
+  border: 1px solid #dbe2ea;
+  border-radius: 16px;
+  padding: 28px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.tutor-input-card h2 {
+  margin: 8px 0;
+  color: #111827;
+}
+
+.tutor-field {
+  margin-top: 20px;
+}
+
+.tutor-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.tutor-field input,
+.tutor-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.tutor-field input:focus,
+.tutor-field textarea:focus {
+  border-color: #2563eb;
+}
+
+.tutor-field textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.ask-tutor-button {
+  margin-top: 20px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ask-tutor-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tutor-error {
+  max-width: 900px;
+  margin: 0 auto 20px;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.tutor-results-header {
+  margin-bottom: 24px;
+}
+
+.tutor-results-header h2 {
+  margin-top: 8px;
+  color: #111827;
+}
+
+.tutor-section {
+  padding: 20px 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.tutor-section h3 {
+  color: #1e3a8a;
+  margin-top: 0;
+}
+
+.tutor-section p,
+.tutor-section li {
+  color: #475569;
+  line-height: 1.7;
+}
+
+.tutor-section ul {
+  padding-left: 20px;
+}
+
+.tutor-section li {
+  margin-bottom: 8px;
+}
