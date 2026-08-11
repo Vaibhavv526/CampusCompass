@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SkillAnalysisPage from "./pages/SkillAnalysisPage";
 import "./App.css";
 import {
   checkHealth,
@@ -17,6 +18,13 @@ function App() {
 
     return savedAssessment ? JSON.parse(savedAssessment) : null;
   });
+  const [skillAnalysis, setSkillAnalysis] = useState(() => {
+  const savedSkillAnalysis = localStorage.getItem("skillAnalysis");
+
+  return savedSkillAnalysis
+    ? JSON.parse(savedSkillAnalysis)
+    : null;
+});
   const [assessmentLoading, setAssessmentLoading] = useState(false);
   const [assessmentError, setAssessmentError] = useState("");
   const [roadmap, setRoadmap] = useState(null);
@@ -210,10 +218,30 @@ const handleRoadmap = async () => {
 
         <section className="dashboard-grid">
           <div className="dashboard-card">
-            <h3>📊 Assessment</h3>
-            <p>Analyze your current skills and identify learning gaps.</p>
-            <button onClick={handleAssessment} disabled={assessmentLoading}>
-              {assessmentLoading ? "Analyzing..." : "Start Assessment"}
+            <h3>🧠 Skill Analysis</h3>
+
+            <p>
+              Analyze your technical skills, identify strengths and
+              weaknesses, and get personalized improvement steps.
+            </p>
+
+            <button
+              onClick={() => navigate("/skill-analysis")}
+            >
+              {skillAnalysis ? "View Analysis" : "Analyze Skills"}
+            </button>
+          </div>
+
+          <div className="dashboard-card">
+            <h3>🧠 Skill Analysis</h3>
+
+            <p>
+              Analyze your technical skills, identify strengths and weaknesses,
+              and get personalized improvement steps.
+            </p>
+
+            <button onClick={() => navigate("/skill-analysis")}>
+              Analyze Skills
             </button>
           </div>
 
@@ -259,6 +287,10 @@ const handleRoadmap = async () => {
 
     <Route path="/assessment" element={<AssessmentPage />} />
     <Route path="/roadmap" element={<RoadmapPage />} />
+    <Route
+      path="/skill-analysis"
+      element={<SkillAnalysisPage />}
+    />
   </Routes>
 );
 }

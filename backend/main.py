@@ -10,6 +10,7 @@ from backend.routes.quiz import router as quiz_router
 from backend.routes.tutor import router as tutor_router
 from backend.routes.assessment import router as assessment_router
 from backend.routes.roadmap import router as roadmap_router
+from backend.routes.skill_analysis import router as skill_analysis_router
 
 
 app = FastAPI(
@@ -42,3 +43,4 @@ app.include_router(roadmap_router)
 app.include_router(tutor_router)
 app.include_router(quiz_router)
 app.include_router(recommendation_router)
+app.include_router(skill_analysis_router)

@@ -51,6 +51,14 @@ export async function askTutor(student, topic, question) {
     }),
   });
 }
+export async function analyzeSkills(skills) {
+  return request("/api/skill-analysis", {
+    method: "POST",
+    body: JSON.stringify({
+      skills,
+    }),
+  });
+}
 
 export async function generateQuiz(student, topic, numQuestions = 5) {
   return request("/api/quiz", {
