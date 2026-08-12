@@ -168,29 +168,28 @@ Return only valid JSON.
             data = data["quiz_evaluation"]
 
         # Normalize deterministic fields using the original quiz.
-        # These values must not depend on the LLM.
+        # These values must NEVER depend on the LLM.
+
         data["topic"] = quiz.topic
         data["total_questions"] = len(quiz.questions)
 
-        if "correct_answers" not in data:
-            data["correct_answers"] = sum(
-                1
-                for question, student_answer in zip(
-                    quiz.questions,
-                    student_answers,
-                )
-                if student_answer.strip()
-                == question.correct_answer.strip()
+        correct_answers = sum(
+            1
+            for question, student_answer in zip(
+                quiz.questions,
+                student_answers,
             )
+            if student_answer.strip()
+            == question.correct_answer.strip()
+        )
 
-        if "score_percentage" not in data:
-            data["score_percentage"] = (
-                data["correct_answers"]
-                / data["total_questions"]
-                * 100
-                if data["total_questions"] > 0
-                else 0.0
-            )
+        data["correct_answers"] = correct_answers
+
+        data["score_percentage"] = (
+            correct_answers / len(quiz.questions) * 100
+            if quiz.questions
+            else 0.0
+        )
 
         try:
             result = QuizEvaluationResponse.model_validate(data)

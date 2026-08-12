@@ -125,11 +125,47 @@ Return ONLY valid JSON.
 
         try:
             data = json.loads(content)
+            print(json.dumps(data, indent=2))
         except json.JSONDecodeError as e:
             raise RuntimeError(
                 f"Recommendation agent returned invalid JSON: {e}"
             ) from e
+        # Normalize recommendation resources.
+        # The LLM may return either strings or resource objects.
 
+        normalized_resources = []
+
+        for resource in data.get("recommended_resources", []):
+            if isinstance(resource, str):
+                normalized_resources.append(
+                    {
+                        "title": resource,
+                        "link": "",
+                        "type": "resource",
+                    }
+                )
+
+            elif isinstance(resource, dict):
+                normalized_resources.append(
+                    {
+                        "title": str(
+                            resource.get("title")
+                            or resource.get("name")
+                            or "Recommended Resource"
+                        ),
+                        "link": str(
+                            resource.get("link")
+                            or resource.get("url")
+                            or ""
+                        ),
+                        "type": str(
+                            resource.get("type")
+                            or "resource"
+                        ),
+                    }
+                )
+
+        data["recommended_resources"] = normalized_resources
         try:
             result = RecommendationResponse.model_validate(data)
         except Exception as e:

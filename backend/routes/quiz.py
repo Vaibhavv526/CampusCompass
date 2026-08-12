@@ -7,7 +7,7 @@ from orchestrator import StudentMentorOrchestrator
 
 from backend.schemas.student import StudentInput
 from agents.quiz_evaluation_agent import QuizEvaluationAgent
-
+from models.student import StudentProfile
 
 router = APIRouter(
     prefix="/api/quiz",

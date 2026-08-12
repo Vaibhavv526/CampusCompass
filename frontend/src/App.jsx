@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SkillAnalysisPage from "./pages/SkillAnalysisPage";
 import "./App.css";
+import RecommendationPage from "./pages/RecommendationPage";
 import {
   checkHealth,
   generateAssessment,
@@ -14,6 +15,7 @@ import {
 } from "./api/auth";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import QuizPage from "./pages/QuizPage";
 import {
   Routes,
   Route,
@@ -347,7 +349,9 @@ const handleRoadmap = async () => {
           <div className="dashboard-card">
             <h3>📝 Quiz</h3>
             <p>Test your knowledge and identify weak areas.</p>
-            <button>Take Quiz</button>
+            <button onClick={() => navigate("/quiz")}>
+              Take Quiz
+            </button>
           </div>
 
           <div className="dashboard-card">
@@ -355,7 +359,9 @@ const handleRoadmap = async () => {
             <p>
               Discover skills, projects, and resources recommended for you.
             </p>
-            <button>View Recommendations</button>
+            <button onClick={() => navigate("/recommendations")}>
+              View Recommendations
+            </button>
           </div>
         </section>
 
@@ -375,9 +381,14 @@ const handleRoadmap = async () => {
     <Route path="/tutor" element={<TutorPage />} />
     <Route path="/login" element={<LoginPage />} />
     <Route path="/register" element={<RegisterPage />} />
+    <Route path="/quiz" element={<QuizPage />} />
     <Route
       path="/skill-analysis"
       element={<SkillAnalysisPage />}
+    />
+    <Route
+      path="/recommendations"
+      element={<RecommendationPage />}
     />
     <Route
       path="/student-profile"

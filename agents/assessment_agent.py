@@ -130,23 +130,31 @@ class AssessmentAgent:
         ###
         for item in recommendations:
 
-            description = item.get(
-                "description",
-                item.get("task", "")
-            )
+            if isinstance(item, str):
+                normalized_recommendations.append({
+                    "description": item,
+                    "timeline": "",
+                })
+                continue
 
-            if not description:
-                description = item.get("title", "")
+            if isinstance(item, dict):
+                description = item.get(
+                    "description",
+                    item.get("task", "")
+                )
 
-            timeline = item.get("timeline", "")
+                if not description:
+                    description = item.get("title", "")
 
-            if timeline is not None:
-                timeline = str(timeline)
+                timeline = item.get("timeline", "")
 
-            normalized_recommendations.append({
-                "description": str(description),
-                "timeline": timeline,
-            })
+                if timeline is not None:
+                    timeline = str(timeline)
+
+                normalized_recommendations.append({
+                    "description": str(description),
+                    "timeline": timeline,
+                })
 
         return {
             "summary": summary,
@@ -205,6 +213,53 @@ Return the assessment using the required structured output schema.
             return LearningAssessmentResponse.model_validate(normalized_data)
 
         except json.JSONDecodeError as e:
-            raise RuntimeError(
-                f"Assessment agent returned invalid JSON: {e}"
-            ) from e
+            repair_prompt = f"""
+    The following assessment response is intended to be JSON
+    but contains invalid JSON syntax.
+
+    Fix ONLY the JSON syntax.
+    Do not change the meaning or evaluation content.
+    Do not add explanations.
+    Do not use markdown.
+    Return ONLY one valid JSON object.
+
+    INVALID JSON:
+    {content}
+    """
+
+            repair_response = self.agent.run(repair_prompt)
+
+            if repair_response.content is None:
+                raise RuntimeError(
+                    f"Assessment agent returned invalid JSON: {e}"
+                ) from e
+
+            repaired = repair_response.content.strip()
+
+            if "```json" in repaired:
+                repaired = repaired.split(
+                    "```json", 1
+                )[1].split("```", 1)[0].strip()
+
+            elif "```" in repaired:
+                repaired = repaired.split(
+                    "```", 1
+                )[1].split("```", 1)[0].strip()
+
+            try:
+                data = json.loads(repaired)
+
+            except json.JSONDecodeError as repair_error:
+                raise RuntimeError(
+                    "Assessment agent returned invalid JSON "
+                    f"after repair: {repair_error}"
+                ) from repair_error
+
+            normalized_data = self._normalize_response(
+                data,
+                student,
+            )
+
+            return LearningAssessmentResponse.model_validate(
+                normalized_data
+            )
