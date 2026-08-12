@@ -1378,3 +1378,20 @@
     align-self: flex-start;
   }
 }
+.logout-button {
+  margin-left: 12px;
+  padding: 7px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.logout-button:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}

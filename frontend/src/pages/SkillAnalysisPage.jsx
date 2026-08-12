@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { analyzeSkills } from "../api/client";
+import {
+  analyzeSkills,
+  getSkills,
+  saveSkill,
+  updateSkill as updateSkillApi,
+  deleteSkill as deleteSkillApi,
+} from "../api/client";
 import { useNavigate } from "react-router-dom";
 import "./SkillAnalysisPage.css";
 
 function SkillAnalysisPage() {
   const navigate = useNavigate();
 
-  const [skills, setSkills] = useState(() => {
-    const savedSkills = localStorage.getItem("skillInputs");
-
-    return savedSkills ? JSON.parse(savedSkills) : [];
-  });
+  const [skills, setSkills] = useState([]);
 
   const [skillInput, setSkillInput] = useState("");
 
@@ -22,6 +24,18 @@ function SkillAnalysisPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  useEffect(() => {
+  const loadSkills = async () => {
+    try {
+      const savedSkills = await getSkills();
+      setSkills(savedSkills);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  loadSkills();
+}, []);
 
   const isInitialLoad = useRef(true);
 
@@ -37,46 +51,97 @@ function SkillAnalysisPage() {
     setAnalysis(null);
   }, [skills]);
 
-  const addSkill = () => {
-    const skill = skillInput.trim();
+ const addSkill = async () => {
+  const skill = skillInput.trim();
 
-    if (!skill) return;
+  if (!skill) return;
 
-    if (
-        skills.some(
-        (item) => item.name.toLowerCase() === skill.toLowerCase()
-        )
-    ) {
-        return;
-    }
+  if (
+    skills.some(
+      (item) => item.name.toLowerCase() === skill.toLowerCase()
+    )
+  ) {
+    return;
+  }
 
-    setSkills([
-        ...skills,
-        {
-        name: skill,
-        proficiency: 50,
-        strengths: "",
-        weak_areas: "",
-        experience: "",
-        },
-    ]);
+  const newSkill = {
+    name: skill,
+    proficiency: 50,
+    strengths: "",
+    weak_areas: "",
+    experience: "",
+  };
 
+  try {
+    const savedSkill = await saveSkill(newSkill);
+
+    setSkills([...skills, savedSkill]);
     setSkillInput("");
-    };
-
-  const removeSkill = (skillToRemove) => {
-  setSkills(
-    skills.filter((skill) => skill.name !== skillToRemove)
-  );
+    setError("");
+  } catch (error) {
+    setError(error.message);
+  }
 };
-  const updateSkill = (skillName, field, value) => {
-  setSkills(
-    skills.map((skill) =>
+
+  const removeSkill = async (skillName) => {
+  const currentSkill = skills.find(
+    (skill) => skill.name === skillName
+  );
+
+  if (!currentSkill) return;
+
+  try {
+    await deleteSkillApi(currentSkill.id);
+
+    setSkills((currentSkills) =>
+      currentSkills.filter(
+        (skill) => skill.id !== currentSkill.id
+      )
+    );
+
+    setError("");
+  } catch (error) {
+    setError(error.message);
+  }
+};
+
+const updateSkill = (skillName, field, value) => {
+  setSkills((currentSkills) =>
+    currentSkills.map((skill) =>
       skill.name === skillName
         ? { ...skill, [field]: value }
         : skill
     )
   );
+};
+const handleSaveChanges = async () => {
+  try {
+    setLoading(true);
+    setError("");
+
+    const updatedSkills = [];
+
+    for (const skill of skills) {
+      const savedSkill = await updateSkillApi(
+        skill.id,
+        {
+          name: skill.name,
+          proficiency: skill.proficiency,
+          strengths: skill.strengths,
+          weak_areas: skill.weak_areas,
+          experience: skill.experience,
+        }
+      );
+
+      updatedSkills.push(savedSkill);
+    }
+
+    setSkills(updatedSkills);
+  } catch (error) {
+    setError(error.message);
+  } finally {
+    setLoading(false);
+  }
 };
 
   const handleKeyDown = (event) => {
@@ -262,7 +327,13 @@ function SkillAnalysisPage() {
             </p>
           </div>
         )}
-
+        <button
+          className="save-skills-button"
+          onClick={handleSaveChanges}
+          disabled={skills.length === 0 || loading}
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </button>
         <button
             className="analyze-skills-button"
             onClick={handleAnalyze}

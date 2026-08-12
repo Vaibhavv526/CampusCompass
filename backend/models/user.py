@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, Integer, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.database.base import Base
 
@@ -43,3 +45,12 @@ class User(Base):
         nullable=False,
         server_default=func.now(),
     )
+
+    student_profile: Mapped["StudentProfile | None"] = relationship(
+        "StudentProfile",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+    

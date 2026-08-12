@@ -5,12 +5,26 @@ import {
   checkHealth,
   generateAssessment,
   generateRoadmap,
+  getStudentProfile,
+  getSkills,
 } from "./api/client";
-
-import { Routes, Route, useNavigate } from "react-router-dom";
+import {
+  getCurrentUser,
+  logoutUser,
+} from "./api/auth";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import AssessmentPage from "./pages/AssessmentPage";
 import RoadmapPage from "./pages/RoadmapPage";
 import TutorPage from "./pages/TutorPage";
+import StudentProfilePage from "./pages/StudentProfilePage";
+
 
 function App() {
   const [apiStatus, setApiStatus] = useState("Checking backend...");
@@ -32,7 +46,52 @@ function App() {
   const [roadmap, setRoadmap] = useState(null);
   const [roadmapLoading, setRoadmapLoading] = useState(false);
   const [roadmapError, setRoadmapError] = useState("");
-  const navigate = useNavigate();
+const navigate = useNavigate();
+const location = useLocation();
+
+const [currentUser, setCurrentUser] = useState(null);
+const [studentProfile, setStudentProfile] = useState(null);
+const [studentSkills, setStudentSkills] = useState([]);
+  useEffect(() => {
+  const publicRoutes = ["/login", "/register"];
+
+  if (publicRoutes.includes(location.pathname)) {
+    return;
+  }
+
+  const loadCurrentUser = async () => {
+    try {
+      const user = await getCurrentUser();
+      setCurrentUser(user);
+    } catch (error) {
+      logoutUser();
+      navigate("/login");
+    }
+  };
+
+  loadCurrentUser();
+}, [location.pathname, navigate]);
+useEffect(() => {
+  if (!currentUser || location.pathname !== "/") {
+    return;
+  }
+
+  const loadStudentData = async () => {
+    try {
+      const profile = await getStudentProfile();
+      const skills = await getSkills();
+
+      setStudentProfile(profile);
+      setStudentSkills(skills);
+    } catch (error) {
+      if (error.message.includes("(404)")) {
+        navigate("/student-profile");
+      }
+    }
+  };
+
+  loadStudentData();
+}, [currentUser, location.pathname, navigate]);
 
   useEffect(() => {
     checkHealth()
@@ -44,45 +103,44 @@ function App() {
       });
   }, []);
 
-  const student = {
-    name: "Vaibhav",
-    email: "vaibhav@example.com",
-    degree: "B.Tech",
-    branch: "Information Technology",
-    current_year: 3,
-    semester: 5,
-    career_goal: "AI Engineer",
-    interests: ["Python", "Machine Learning", "Deep Learning"],
-    weekly_hours: 10,
-    skills: [
-      {
-        name: "Python",
-        category: "Programming",
-        current_level: 30,
-        target_level: 90,
-      },
-      {
-        name: "DSA",
-        category: "Computer Science",
-        current_level: 35,
-        target_level: 85,
-      },
-      {
-        name: "Machine Learning",
-        category: "AI",
-        current_level: 20,
-        target_level: 80,
-      },
-    ],
-  };
+  const student = studentProfile
+  ? {
+      name: studentProfile.full_name,
+      email: currentUser?.email,
+      degree: studentProfile.degree,
+      branch: studentProfile.branch,
+      current_year: studentProfile.current_year,
+      semester: studentProfile.semester,
+      career_goal: studentProfile.career_goal,
+      interests: studentProfile.interests
+        ? studentProfile.interests
+            .split(",")
+            .map((item) => item.trim())
+        : [],
+      weekly_hours: studentProfile.weekly_hours,
+      skills: studentSkills.map((skill) => ({
+        name: skill.name,
+        category: "Technical Skill",
+        current_level: skill.proficiency,
+        target_level: 100,
+        strengths: skill.strengths,
+        weak_areas: skill.weak_areas,
+        experience: skill.experience,
+      })),
+    }
+  : null;
   const handleAssessment = async () => {
+  if (!student) {
+    setAssessmentError("Student profile is still loading.");
+    return;
+  }
+
   setAssessmentLoading(true);
   setAssessmentError("");
 
   try {
     const result = await generateAssessment(student);
 
-    setAssessment(result);
     setAssessment(result);
     localStorage.setItem("assessment", JSON.stringify(result));
     setShowAssessmentPopup(true);
@@ -95,6 +153,11 @@ function App() {
 };
 
 const handleRoadmap = async () => {
+  if (!student) {
+    setRoadmapError("Student profile is still loading.");
+    return;
+  }
+
   const savedAssessment = localStorage.getItem("assessment");
 
   const assessmentData = assessment
@@ -132,9 +195,24 @@ const handleRoadmap = async () => {
         </div>
 
         <div className="student-badge">
-          <span className="avatar">V</span>
-          <span>Student</span>
-        </div>
+  <span className="avatar">
+    {currentUser?.full_name?.charAt(0).toUpperCase() || "U"}
+  </span>
+
+  <span>
+    {currentUser?.full_name || "Student"}
+  </span>
+
+  <button
+    className="logout-button"
+    onClick={() => {
+      logoutUser();
+      navigate("/login");
+    }}
+  >
+    Logout
+  </button>
+</div>
       </header>
 
       <main className="dashboard">
@@ -295,9 +373,15 @@ const handleRoadmap = async () => {
     <Route path="/assessment" element={<AssessmentPage />} />
     <Route path="/roadmap" element={<RoadmapPage />} />
     <Route path="/tutor" element={<TutorPage />} />
+    <Route path="/login" element={<LoginPage />} />
+    <Route path="/register" element={<RegisterPage />} />
     <Route
       path="/skill-analysis"
       element={<SkillAnalysisPage />}
+    />
+    <Route
+      path="/student-profile"
+      element={<StudentProfilePage />}
     />
   </Routes>
 );

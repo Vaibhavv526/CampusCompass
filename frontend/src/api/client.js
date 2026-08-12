@@ -1,9 +1,19 @@
+import { getAccessToken } from "./auth";
+
 const API_BASE_URL = "http://127.0.0.1:8000";
 
 async function request(endpoint, options = {}) {
+  const token = getAccessToken();
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
+
+      ...(token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {}),
+
       ...(options.headers || {}),
     },
     ...options,
@@ -15,6 +25,10 @@ async function request(endpoint, options = {}) {
     throw new Error(
       `API request failed (${response.status}): ${errorText}`
     );
+  }
+
+  if (response.status === 204) {
+  return null;
   }
 
   return response.json();
@@ -85,5 +99,38 @@ export async function getRecommendations(student) {
   return request("/api/recommendations", {
     method: "POST",
     body: JSON.stringify(student),
+  });
+}
+export async function getSkills() {
+  return request("/api/skills");
+}
+
+export async function saveSkill(skill) {
+  return request("/api/skills", {
+    method: "POST",
+    body: JSON.stringify(skill),
+  });
+}
+export async function deleteSkill(skillId) {
+  return request(`/api/skills/${skillId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function updateSkill(skillId, skill) {
+  return request(`/api/skills/${skillId}`, {
+    method: "PUT",
+    body: JSON.stringify(skill),
+  });
+}
+
+export async function getStudentProfile() {
+  return request("/api/student-profile");
+}
+
+export async function createStudentProfile(profile) {
+  return request("/api/student-profile", {
+    method: "POST",
+    body: JSON.stringify(profile),
   });
 }
