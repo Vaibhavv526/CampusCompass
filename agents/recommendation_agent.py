@@ -164,7 +164,40 @@ Return ONLY valid JSON.
                         ),
                     }
                 )
+        # Normalize recommended skills
+        normalized_skills = []
 
+        for skill in data.get("recommended_skills", []):
+            if isinstance(skill, str):
+                normalized_skills.append(skill)
+            elif isinstance(skill, dict):
+                normalized_skills.append(
+                    str(
+                        skill.get("name")
+                        or skill.get("title")
+                        or "Recommended Skill"
+                    )
+                )
+
+        data["recommended_skills"] = normalized_skills
+
+
+        # Normalize recommended projects
+        normalized_projects = []
+
+        for project in data.get("recommended_projects", []):
+            if isinstance(project, str):
+                normalized_projects.append(project)
+            elif isinstance(project, dict):
+                normalized_projects.append(
+                    str(
+                        project.get("name")
+                        or project.get("title")
+                        or "Recommended Project"
+                    )
+                )
+
+        data["recommended_projects"] = normalized_projects
         data["recommended_resources"] = normalized_resources
         try:
             result = RecommendationResponse.model_validate(data)
