@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../api/auth";
 import "./RoadmapPage.css";
 
 function RoadmapPage() {
@@ -7,6 +9,69 @@ function RoadmapPage() {
 
   const roadmap = location.state?.roadmap;
   const student = location.state?.student;
+  const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+      const loadUser = async () => {
+        try {
+          const user = await getCurrentUser();
+          setCurrentUser(user);
+        } catch (error) {
+          console.error("Failed to load current user:", error);
+        }
+      };
+
+      loadUser();
+    }, []);
+  const [steps, setSteps] = useState([]);
+
+  useEffect(() => {
+    if (!currentUser || !roadmap) {
+      return;
+    }
+
+    const storageKey = `roadmapSteps_${currentUser.id}`;
+
+    const savedSteps = localStorage.getItem(storageKey);
+
+    setSteps(
+      savedSteps
+        ? JSON.parse(savedSteps)
+        : roadmap.steps || []
+    );
+  }, [currentUser, roadmap]);
+ const toggleStep = (index) => {
+  setSteps((currentSteps) => {
+    const updatedSteps = currentSteps.map((step, stepIndex) =>
+      stepIndex === index
+        ? {
+            ...step,
+            completed: !step.completed,
+          }
+        : step
+    );
+
+    if (currentUser) {
+      const storageKey = `roadmapSteps_${currentUser.id}`;
+
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify(updatedSteps)
+      );
+    }
+
+    return updatedSteps;
+  });
+};
+
+const completedSteps = steps.filter(
+  (step) => step.completed
+).length;
+
+const progressPercentage =
+  steps.length > 0
+    ? Math.round((completedSteps / steps.length) * 100)
+    : 0;
 
   if (!roadmap) {
     return (
@@ -62,22 +127,30 @@ function RoadmapPage() {
         </div>
       </header>
 
-      <section className="roadmap-intro">
-        <p className="eyebrow">TARGET ROLE</p>
+      <section className="roadmap-progress">
+        <div className="roadmap-progress-header">
+          <div>
+            <p className="eyebrow">YOUR PROGRESS</p>
+            <h3>
+              {completedSteps} of {steps.length} steps completed
+            </h3>
+          </div>
 
-        <h2>
-          Your path toward becoming an{" "}
-          <span>{roadmap.target_role}</span>
-        </h2>
+          <strong>{progressPercentage}%</strong>
+        </div>
 
-        <p>
-          Follow these learning steps in order to gradually build the
-          skills required for your career goal.
-        </p>
+        <div className="roadmap-progress-bar">
+          <div
+            className="roadmap-progress-fill"
+            style={{
+              width: `${progressPercentage}%`,
+            }}
+          />
+        </div>
       </section>
 
       <section className="roadmap-timeline">
-        {roadmap.steps.map((step, index) => (
+        {steps.map((step, index) => (
           <div className="roadmap-item" key={index}>
             <div className="roadmap-number">
               {index + 1}
@@ -104,7 +177,11 @@ function RoadmapPage() {
                 {step.description}
               </p>
 
-              <div className="roadmap-status">
+              <div
+                className="roadmap-status"
+                onClick={() => toggleStep(index)}
+                style={{ cursor: "pointer" }}
+              >
                 {step.completed ? (
                   <span className="completed">
                     ✓ Completed
