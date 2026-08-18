@@ -34,7 +34,7 @@ class RecommendationAgent:
                 "Return JSON matching the RecommendationResponse "
                 "structure exactly."
             ),
-            structured_outputs=False,
+            structured_outputs=True,
         )
 
     def recommend(
