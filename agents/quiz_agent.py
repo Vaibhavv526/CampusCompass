@@ -8,7 +8,7 @@ class QuizAgent:
 
     def __init__(
         self,
-        model_name: str = "llama-3.1-8b-instant",
+        model_name: str = "openai/gpt-oss-20b",
     ):  ##
         self.model_name = model_name
         self.agent = Agent(
