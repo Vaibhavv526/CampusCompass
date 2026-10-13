@@ -6,50 +6,66 @@ import {
   updateSkill as updateSkillApi,
   deleteSkill as deleteSkillApi,
 } from "../api/client";
+import { getCurrentUser } from "../api/auth";
 import { useNavigate } from "react-router-dom";
 import "./SkillAnalysisPage.css";
 
 function SkillAnalysisPage() {
   const navigate = useNavigate();
 
+  const [currentUser, setCurrentUser] = useState(null);
   const [skills, setSkills] = useState([]);
-
   const [skillInput, setSkillInput] = useState("");
-
-  const [analysis, setAnalysis] = useState(() => {
-    const savedAnalysis = localStorage.getItem("skillAnalysis");
-
-    return savedAnalysis ? JSON.parse(savedAnalysis) : null;
-  });
-
+  const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => {
-  const loadSkills = async () => {
-    try {
-      const savedSkills = await getSkills();
-      setSkills(savedSkills);
-    } catch (error) {
-      setError(error.message);
-    }
-  };
 
-  loadSkills();
-}, []);
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadUserAndSkills = async () => {
+      try {
+        const [user, savedSkills] = await Promise.all([
+          getCurrentUser(),
+          getSkills(),
+        ]);
+        if (isCancelled) return;
+        setCurrentUser(user);
+        setSkills(savedSkills);
+        if (user?.id) {
+          const savedAnalysis = localStorage.getItem(`skillAnalysis_${user.id}`);
+          if (savedAnalysis && !isCancelled) {
+            setAnalysis(JSON.parse(savedAnalysis));
+          }
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setError(err.message);
+        }
+      }
+    };
+
+    loadUserAndSkills();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const isInitialLoad = useRef(true);
 
   useEffect(() => {
-    localStorage.setItem("skillInputs", JSON.stringify(skills));
+    if (!currentUser?.id) return;
+    localStorage.setItem(`skillInputs_${currentUser.id}`, JSON.stringify(skills));
 
     if (isInitialLoad.current) {
       isInitialLoad.current = false;
       return;
     }
 
-    localStorage.removeItem("skillAnalysis");
+    localStorage.removeItem(`skillAnalysis_${currentUser.id}`);
     setAnalysis(null);
-  }, [skills]);
+  }, [skills, currentUser?.id]);
 
  const addSkill = async () => {
   const skill = skillInput.trim();
@@ -160,7 +176,9 @@ const handleSaveChanges = async () => {
         const result = await analyzeSkills(skills);
 
         setAnalysis(result);
-        localStorage.setItem("skillAnalysis", JSON.stringify(result));
+        if (currentUser?.id) {
+          localStorage.setItem(`skillAnalysis_${currentUser.id}`, JSON.stringify(result));
+        }
     } catch (error) {
         setError(error.message);
     } finally {

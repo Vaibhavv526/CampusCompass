@@ -6,6 +6,7 @@ import {
   evaluateQuiz,
   getStudentProfile,
   getSkills,
+  createLearningActivity,
 } from "../api/client";
 
 function QuizPage() {
@@ -123,6 +124,29 @@ const handleSubmitQuiz = async () => {
   console.log("Quiz evaluation received:", evaluation);
 
   setResult(evaluation);
+
+  // Phase 2A: Persist quiz attempt to learning history (non-blocking)
+  try {
+    const totalQ = evaluation.total_questions || quiz.questions?.length || 5;
+    const correct = evaluation.correct_answers || 0;
+    const scoreVal = evaluation.score_percentage !== undefined
+      ? evaluation.score_percentage
+      : (totalQ > 0 ? (correct / totalQ) * 100 : 0);
+    await createLearningActivity({
+      activity_type: "quiz",
+      title: `Quiz: ${topic.trim()}`,
+      summary: `Score: ${correct}/${totalQ} (${Math.round(scoreVal)}%)`,
+      score: Math.min(100.0, Math.max(0.0, scoreVal)),
+      data: {
+        topic: topic.trim(),
+        quiz: quiz,
+        answers: answers,
+        evaluation: evaluation,
+      },
+    });
+  } catch (historyErr) {
+    console.warn("Could not persist quiz activity to user history:", historyErr);
+  }
   } catch (error) {
     setError(error.message);
   } finally {

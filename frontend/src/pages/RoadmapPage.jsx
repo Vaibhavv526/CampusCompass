@@ -1,48 +1,112 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../api/auth";
+import { getLearningHistory, updateLearningActivity } from "../api/client";
 import "./RoadmapPage.css";
 
 function RoadmapPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const roadmap = location.state?.roadmap;
-  const student = location.state?.student;
+  const initialRoadmap = location.state?.roadmap;
+  const initialStudent = location.state?.student;
+
   const [currentUser, setCurrentUser] = useState(null);
+  const [roadmap, setRoadmap] = useState(initialRoadmap || null);
+  const [student, setStudent] = useState(initialStudent || null);
+  const [activityId, setActivityId] = useState(initialRoadmap?._activityId || null);
+  const [steps, setSteps] = useState(initialRoadmap?.steps || []);
+  const [loading, setLoading] = useState(!initialRoadmap);
 
-    useEffect(() => {
-      const loadUser = async () => {
-        try {
-          const user = await getCurrentUser();
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!isCancelled) {
           setCurrentUser(user);
-        } catch (error) {
-          console.error("Failed to load current user:", error);
         }
-      };
+      } catch (error) {
+        console.error("Failed to load current user:", error);
+      }
+    };
 
-      loadUser();
-    }, []);
-  const [steps, setSteps] = useState([]);
+    loadUser();
 
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  // Restore roadmap from persistent learning history if not passed in location.state (e.g., page refresh)
+  useEffect(() => {
+    let isCancelled = false;
+
+    const restoreRoadmap = async () => {
+      if (initialRoadmap) {
+        setRoadmap(initialRoadmap);
+        if (initialRoadmap._activityId) {
+          setActivityId(initialRoadmap._activityId);
+        }
+        setSteps(initialRoadmap.steps || []);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const historyItems = await getLearningHistory({
+          activity_type: "roadmap",
+          limit: 1,
+        });
+
+        if (!isCancelled && historyItems && historyItems.length > 0) {
+          const latest = historyItems[0];
+          setActivityId(latest.id);
+          const roadmapData = latest.data || {};
+          setRoadmap(roadmapData);
+          setSteps(roadmapData.steps || []);
+        }
+      } catch (err) {
+        console.warn("Could not restore roadmap from learning history:", err);
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    restoreRoadmap();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [initialRoadmap]);
+
+  // Load user-specific steps overlay from localStorage if present
   useEffect(() => {
     if (!currentUser || !roadmap) {
       return;
     }
 
     const storageKey = `roadmapSteps_${currentUser.id}`;
-
     const savedSteps = localStorage.getItem(storageKey);
 
-    setSteps(
-      savedSteps
-        ? JSON.parse(savedSteps)
-        : roadmap.steps || []
-    );
+    if (savedSteps) {
+      try {
+        const parsed = JSON.parse(savedSteps);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSteps(parsed);
+        }
+      } catch (e) {
+        console.error("Failed to parse saved steps:", e);
+      }
+    }
   }, [currentUser, roadmap]);
- const toggleStep = (index) => {
-  setSteps((currentSteps) => {
-    const updatedSteps = currentSteps.map((step, stepIndex) =>
+
+  const toggleStep = async (index) => {
+    const updatedSteps = steps.map((step, stepIndex) =>
       stepIndex === index
         ? {
             ...step,
@@ -51,27 +115,70 @@ function RoadmapPage() {
         : step
     );
 
+    setSteps(updatedSteps);
+
+    const completedStepsCount = updatedSteps.filter(
+      (step) => step.completed
+    ).length;
+
+    const progressPercentage =
+      updatedSteps.length > 0
+        ? Math.round((completedStepsCount / updatedSteps.length) * 100)
+        : 0;
+
     if (currentUser) {
       const storageKey = `roadmapSteps_${currentUser.id}`;
-
       localStorage.setItem(
         storageKey,
         JSON.stringify(updatedSteps)
       );
     }
 
-    return updatedSteps;
-  });
-};
+    // Phase 2A: Persist milestone change to existing learning activity record (non-blocking, no duplicate entries)
+    if (activityId) {
+      try {
+        const summaryText = `${completedStepsCount} of ${updatedSteps.length} steps completed (${progressPercentage}%)`;
+        await updateLearningActivity(activityId, {
+          summary: summaryText,
+          score: progressPercentage,
+          data: {
+            ...(roadmap || {}),
+            steps: updatedSteps,
+          },
+        });
+      } catch (err) {
+        console.warn("Failed to persist milestone update to server:", err);
+      }
+    }
+  };
 
-const completedSteps = steps.filter(
-  (step) => step.completed
-).length;
+  const completedSteps = steps.filter(
+    (step) => step.completed
+  ).length;
 
-const progressPercentage =
-  steps.length > 0
-    ? Math.round((completedSteps / steps.length) * 100)
-    : 0;
+  const progressPercentage =
+    steps.length > 0
+      ? Math.round((completedSteps / steps.length) * 100)
+      : 0;
+
+  if (loading) {
+    return (
+      <div className="roadmap-page">
+        <button
+          className="back-button"
+          onClick={() => navigate("/")}
+        >
+          ← Back to Dashboard
+        </button>
+
+        <div className="roadmap-empty">
+          <div className="roadmap-empty-icon">⏳</div>
+          <h1>Loading Roadmap...</h1>
+          <p>Restoring your personalized roadmap and milestone progress.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!roadmap) {
     return (
@@ -196,25 +303,26 @@ const progressPercentage =
           </div>
         ))}
       </section>
-            <section className="roadmap-next-section">
-                <div>
-                <p className="roadmap-next-eyebrow">WHAT'S NEXT?</p>
 
-                <h2>Turn this analysis into a learning roadmap.</h2>
+      <section className="roadmap-next-section">
+        <div>
+          <p className="roadmap-next-eyebrow">WHAT'S NEXT?</p>
 
-                <p>
-                    Use your assessment results to generate a personalized sequence
-                    of learning steps toward your AI Engineer goal.
-                </p>
-                </div>
+          <h2>Turn this analysis into a learning roadmap.</h2>
 
-                <button
-                className="roadmap-dashboard-button"
-                onClick={() => navigate("/")}
-                >
-                ← Back to Dashboard
-                </button>
-            </section>
+          <p>
+            Use your assessment results to generate a personalized sequence
+            of learning steps toward your AI Engineer goal.
+          </p>
+        </div>
+
+        <button
+          className="roadmap-dashboard-button"
+          onClick={() => navigate("/")}
+        >
+          ← Back to Dashboard
+        </button>
+      </section>
     </div>
   );
 }

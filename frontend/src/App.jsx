@@ -30,18 +30,8 @@ import StudentProfilePage from "./pages/StudentProfilePage";
 
 function App() {
   const [apiStatus, setApiStatus] = useState("Checking backend...");
-  const [assessment, setAssessment] = useState(() => {
-    const savedAssessment = localStorage.getItem("assessment");
-
-    return savedAssessment ? JSON.parse(savedAssessment) : null;
-  });
-  const [skillAnalysis, setSkillAnalysis] = useState(() => {
-  const savedSkillAnalysis = localStorage.getItem("skillAnalysis");
-
-  return savedSkillAnalysis
-    ? JSON.parse(savedSkillAnalysis)
-    : null;
-});
+  const [assessment, setAssessment] = useState(null);
+  const [skillAnalysis, setSkillAnalysis] = useState(null);
   const [showAssessmentPopup, setShowAssessmentPopup] = useState(false);
   const [assessmentLoading, setAssessmentLoading] = useState(false);
   const [assessmentError, setAssessmentError] = useState("");
@@ -55,45 +45,80 @@ const [currentUser, setCurrentUser] = useState(null);
 const [studentProfile, setStudentProfile] = useState(null);
 const [studentSkills, setStudentSkills] = useState([]);
   useEffect(() => {
-  const publicRoutes = ["/login", "/register"];
+    let isCancelled = false;
+    const publicRoutes = ["/login", "/register"];
 
-  if (publicRoutes.includes(location.pathname)) {
-    return;
-  }
-
-  const loadCurrentUser = async () => {
-    try {
-      const user = await getCurrentUser();
-      setCurrentUser(user);
-    } catch (error) {
-      logoutUser();
-      navigate("/login");
+    if (publicRoutes.includes(location.pathname)) {
+      return;
     }
-  };
 
-  loadCurrentUser();
-}, [location.pathname, navigate]);
-useEffect(() => {
-  if (!currentUser || location.pathname !== "/") {
-    return;
-  }
-
-  const loadStudentData = async () => {
-    try {
-      const profile = await getStudentProfile();
-      const skills = await getSkills();
-
-      setStudentProfile(profile);
-      setStudentSkills(skills);
-    } catch (error) {
-      if (error.message.includes("(404)")) {
-        navigate("/student-profile");
+    const loadCurrentUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (!isCancelled) {
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          logoutUser();
+          setCurrentUser(null);
+          navigate("/login");
+        }
       }
-    }
-  };
+    };
 
-  loadStudentData();
-}, [currentUser, location.pathname, navigate]);
+    loadCurrentUser();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [location.pathname, navigate]);
+
+  useEffect(() => {
+    if (!currentUser || location.pathname !== "/") {
+      return;
+    }
+
+    let isCancelled = false;
+    const loadStudentData = async () => {
+      try {
+        const profile = await getStudentProfile();
+        const skills = await getSkills();
+
+        if (!isCancelled) {
+          setStudentProfile(profile);
+          setStudentSkills(skills);
+        }
+      } catch (error) {
+        if (!isCancelled && error.message.includes("(404)")) {
+          navigate("/student-profile");
+        }
+      }
+    };
+
+    loadStudentData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentUser, location.pathname, navigate]);
+
+  // Scoped assessment and skill analysis restoration per authenticated user ID
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setAssessment(null);
+      setSkillAnalysis(null);
+      return;
+    }
+
+    const userAssessmentKey = `assessment_${currentUser.id}`;
+    const savedAssessment = localStorage.getItem(userAssessmentKey);
+    setAssessment(savedAssessment ? JSON.parse(savedAssessment) : null);
+
+    const userSkillKey = `skillAnalysis_${currentUser.id}`;
+    const savedSkillAnalysis = localStorage.getItem(userSkillKey);
+    setSkillAnalysis(savedSkillAnalysis ? JSON.parse(savedSkillAnalysis) : null);
+  }, [currentUser?.id]);
 
   useEffect(() => {
     checkHealth()
@@ -144,8 +169,27 @@ useEffect(() => {
     const result = await generateAssessment(student);
 
     setAssessment(result);
-    localStorage.setItem("assessment", JSON.stringify(result));
+    if (currentUser?.id) {
+      localStorage.setItem(`assessment_${currentUser.id}`, JSON.stringify(result));
+    }
     setShowAssessmentPopup(true);
+
+    // Phase 2A: Persist skill gap assessment to user history (non-blocking)
+    try {
+      const gaps = result.skill_gaps || [];
+      const highCount = gaps.filter(
+        (g) => (g.priority || "").toLowerCase() === "high"
+      ).length;
+      await createLearningActivity({
+        activity_type: "assessment",
+        title: `Skill Gap Assessment (${student.career_goal || "General"})`,
+        summary: `${gaps.length} skills analyzed, ${highCount} high-priority gap(s)`,
+        score: null,
+        data: result,
+      });
+    } catch (historyErr) {
+      console.warn("Could not persist assessment to user history:", historyErr);
+    }
 
   } catch (error) {
     setAssessmentError(error.message);
@@ -160,7 +204,8 @@ const handleRoadmap = async () => {
     return;
   }
 
-  const savedAssessment = localStorage.getItem("assessment");
+  const userAssessmentKey = currentUser?.id ? `assessment_${currentUser.id}` : null;
+  const savedAssessment = userAssessmentKey ? localStorage.getItem(userAssessmentKey) : null;
 
   const assessmentData = assessment
     || (savedAssessment ? JSON.parse(savedAssessment) : null);
@@ -176,12 +221,42 @@ const handleRoadmap = async () => {
   try {
     const result = await generateRoadmap(student, assessmentData);
     setRoadmap(result);
+
+    // Phase 2A: Persist new roadmap to user history (non-blocking)
+    try {
+      const stepsCount = result.steps?.length || 0;
+      const savedRoadmap = await createLearningActivity({
+        activity_type: "roadmap",
+        title: result.title || "Career Learning Roadmap",
+        summary: `0 of ${stepsCount} milestones completed (0%)`,
+        score: 0.0,
+        data: result,
+      });
+      if (savedRoadmap?.id) {
+        result._activityId = savedRoadmap.id;
+        setRoadmap({ ...result, _activityId: savedRoadmap.id });
+      }
+    } catch (historyErr) {
+      console.warn("Could not persist roadmap to user history:", historyErr);
+    }
   } catch (error) {
     setRoadmapError(error.message);
   } finally {
     setRoadmapLoading(false);
   }
 };
+
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+    setStudentProfile(null);
+    setStudentSkills([]);
+    setAssessment(null);
+    setSkillAnalysis(null);
+    setRoadmap(null);
+    setShowAssessmentPopup(false);
+    navigate("/login");
+  };
 
   return (
     <Routes>
@@ -215,10 +290,7 @@ const handleRoadmap = async () => {
 
   <button
     className="logout-button"
-    onClick={() => {
-      logoutUser();
-      navigate("/login");
-    }}
+    onClick={handleLogout}
   >
     Logout
   </button>

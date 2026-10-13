@@ -141,3 +141,37 @@ export async function updateStudentProfile(profile) {
     body: JSON.stringify(profile),
   });
 }
+
+
+export async function createLearningActivity(activity) {
+  return request("/api/learning-history", {
+    method: "POST",
+    body: JSON.stringify(activity),
+  });
+}
+
+export async function getLearningHistory(params = {}) {
+  const query = new URLSearchParams();
+  if (params.activity_type) query.set("activity_type", params.activity_type);
+  if (params.limit !== undefined) query.set("limit", params.limit);
+  if (params.offset !== undefined) query.set("offset", params.offset);
+  const qs = query.toString();
+  return request(`/api/learning-history${qs ? `?${qs}` : ""}`);
+}
+
+export async function getLearningActivity(activityId) {
+  return request(`/api/learning-history/${activityId}`);
+}
+
+export async function updateLearningActivity(activityId, updateData) {
+  return request(`/api/learning-history/${activityId}`, {
+    method: "PATCH",
+    body: JSON.stringify(updateData),
+  });
+}
+
+export async function deleteLearningActivity(activityId) {
+  return request(`/api/learning-history/${activityId}`, {
+    method: "DELETE",
+  });
+}

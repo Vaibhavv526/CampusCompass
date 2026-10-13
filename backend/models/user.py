@@ -53,4 +53,8 @@ class User(Base):
         cascade="all, delete-orphan",
     )
 
-    
+    learning_activities: Mapped[list["LearningActivity"]] = relationship(
+        "LearningActivity",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
