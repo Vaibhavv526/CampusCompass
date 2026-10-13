@@ -7,10 +7,12 @@ from backend.models.user import User
 from backend.schemas.student_profile import (
     StudentProfileCreate,
     StudentProfileResponse,
+    StudentProfileUpdate,
 )
 from backend.services.student_profile_service import (
     create_student_profile,
     get_student_profile,
+    update_student_profile,
 )
 
 
@@ -68,3 +70,31 @@ def get_profile(
         )
 
     return profile
+
+
+@router.put(
+    "",
+    response_model=StudentProfileResponse,
+)
+def update_profile(
+    profile_data: StudentProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    profile = get_student_profile(
+        db,
+        current_user.id,
+    )
+
+    if profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student profile not found. Please complete profile onboarding first.",
+        )
+
+    return update_student_profile(
+        db=db,
+        user=current_user,
+        profile=profile,
+        profile_data=profile_data,
+    )

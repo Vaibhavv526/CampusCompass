@@ -2,7 +2,10 @@ from sqlalchemy.orm import Session
 
 from backend.models.student_profile import StudentProfile
 from backend.models.user import User
-from backend.schemas.student_profile import StudentProfileCreate
+from backend.schemas.student_profile import (
+    StudentProfileCreate,
+    StudentProfileUpdate,
+)
 
 
 def get_student_profile(
@@ -38,3 +41,32 @@ def create_student_profile(
     db.refresh(profile)
 
     return profile
+
+
+def update_student_profile(
+    db: Session,
+    user: User,
+    profile: StudentProfile,
+    profile_data: StudentProfileUpdate,
+) -> StudentProfile:
+    try:
+        if profile_data.full_name is not None and profile_data.full_name.strip():
+            user.full_name = profile_data.full_name.strip()
+            profile.full_name = profile_data.full_name.strip()
+
+        profile.degree = profile_data.degree
+        profile.branch = profile_data.branch
+        profile.current_year = profile_data.current_year
+        profile.semester = profile_data.semester
+        profile.career_goal = profile_data.career_goal
+        profile.interests = profile_data.interests
+        profile.weekly_hours = profile_data.weekly_hours
+
+        db.commit()
+        db.refresh(profile)
+        db.refresh(user)
+
+        return profile
+    except Exception:
+        db.rollback()
+        raise

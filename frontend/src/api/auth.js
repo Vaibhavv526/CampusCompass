@@ -86,3 +86,34 @@ export async function getCurrentUser() {
 
   return response.json();
 }
+export async function changePassword(currentPassword, newPassword) {
+  const token = getAccessToken();
+
+  const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Failed to change password (${response.status})`;
+    try {
+      const errorJson = await response.json();
+      if (errorJson.detail) {
+        errorMessage = errorJson.detail;
+      }
+    } catch {
+      const errorText = await response.text();
+      if (errorText) errorMessage = errorText;
+    }
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+}

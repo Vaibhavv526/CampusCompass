@@ -55,3 +55,25 @@ def authenticate_user(
         return None
 
     return user
+
+
+def change_password(
+    db: Session,
+    user: User,
+    current_password: str,
+    new_password: str,
+) -> bool:
+    if not verify_password(
+        current_password,
+        user.hashed_password,
+    ):
+        return False
+
+    try:
+        user.hashed_password = hash_password(new_password)
+        db.commit()
+        db.refresh(user)
+        return True
+    except Exception:
+        db.rollback()
+        raise

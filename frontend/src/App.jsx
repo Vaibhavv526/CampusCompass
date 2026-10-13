@@ -206,6 +206,14 @@ const handleRoadmap = async () => {
   </span>
 
   <button
+    className="profile-button"
+    onClick={() => navigate("/student-profile")}
+    title="View & Edit Profile, Change Password"
+  >
+    ⚙️ Profile & Settings
+  </button>
+
+  <button
     className="logout-button"
     onClick={() => {
       logoutUser();
@@ -293,7 +301,7 @@ const handleRoadmap = async () => {
           </div>
         )}
         <section className="welcome-section">
-          <h2>Welcome back 👋</h2>
+          <h2>Welcome back</h2>
           <p>
             Track your learning progress, get personalized recommendations,
             practice with quizzes, and ask your AI tutor for help.

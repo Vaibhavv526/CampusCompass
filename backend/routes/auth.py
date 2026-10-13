@@ -6,9 +6,16 @@ from backend.auth.dependencies import get_current_user
 from backend.auth.jwt_handler import create_access_token
 from backend.database.session import get_db
 from backend.models.user import User
-from backend.schemas.auth import Token, UserCreate, UserResponse
+from backend.schemas.auth import (
+    MessageResponse,
+    PasswordChangeRequest,
+    Token,
+    UserCreate,
+    UserResponse,
+)
 from backend.services.user_service import (
     authenticate_user,
+    change_password,
     create_user,
     get_user_by_email,
 )
@@ -89,3 +96,31 @@ def get_my_profile(
     current_user: User = Depends(get_current_user),
 ):
     return current_user
+
+
+@router.post(
+    "/change-password",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+)
+def change_password_route(
+    request: PasswordChangeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    success = change_password(
+        db=db,
+        user=current_user,
+        current_password=request.current_password,
+        new_password=request.new_password,
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect current password.",
+        )
+
+    return {
+        "message": "Password changed successfully.",
+    }

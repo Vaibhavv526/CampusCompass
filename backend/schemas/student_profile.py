@@ -15,6 +15,25 @@ class StudentProfileCreate(BaseModel):
     )
 
 
+class StudentProfileUpdate(BaseModel):
+    full_name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+    )
+    degree: str = Field(min_length=1, max_length=100)
+    branch: str = Field(min_length=1, max_length=100)
+    current_year: int = Field(ge=1, le=10)
+    semester: int = Field(ge=1, le=20)
+    career_goal: str = Field(min_length=1, max_length=200)
+    interests: str | None = None
+    weekly_hours: int | None = Field(
+        default=None,
+        ge=1,
+        le=168,
+    )
+
+
 class StudentProfileResponse(BaseModel):
     id: int
     user_id: int

@@ -135,3 +135,9 @@ export async function createStudentProfile(profile) {
     body: JSON.stringify(profile),
   });
 }
+export async function updateStudentProfile(profile) {
+  return request("/api/student-profile", {
+    method: "PUT",
+    body: JSON.stringify(profile),
+  });
+}
