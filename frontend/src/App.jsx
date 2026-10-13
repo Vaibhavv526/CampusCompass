@@ -26,6 +26,7 @@ import AssessmentPage from "./pages/AssessmentPage";
 import RoadmapPage from "./pages/RoadmapPage";
 import TutorPage from "./pages/TutorPage";
 import StudentProfilePage from "./pages/StudentProfilePage";
+import LearningHistoryPage from "./pages/LearningHistoryPage";
 
 
 function App() {
@@ -281,6 +282,14 @@ const handleRoadmap = async () => {
   </span>
 
   <button
+    className="history-button"
+    onClick={() => navigate("/learning-history")}
+    title="View your saved learning activities"
+  >
+    📜 Learning History
+  </button>
+
+  <button
     className="profile-button"
     onClick={() => navigate("/student-profile")}
     title="View & Edit Profile, Change Password"
@@ -433,7 +442,6 @@ const handleRoadmap = async () => {
               Take Quiz
             </button>
           </div>
-
           <div className="dashboard-card">
             <h3>💡 Recommendations</h3>
             <p>
@@ -441,6 +449,16 @@ const handleRoadmap = async () => {
             </p>
             <button onClick={() => navigate("/recommendations")}>
               View Recommendations
+            </button>
+          </div>
+
+          <div className="dashboard-card">
+            <h3>📜 Learning History</h3>
+            <p>
+              Review past assessments, quiz scores, and learning roadmap progress.
+            </p>
+            <button onClick={() => navigate("/learning-history")}>
+              View History
             </button>
           </div>
         </section>
@@ -473,6 +491,10 @@ const handleRoadmap = async () => {
     <Route
       path="/student-profile"
       element={<StudentProfilePage />}
+    />
+    <Route
+      path="/learning-history"
+      element={<LearningHistoryPage />}
     />
   </Routes>
 );
