@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from backend.auth.dependencies import get_current_user
+from backend.models.user import User
 from models.skill import Skill
 from models.quiz_schema import QuizResponse
 from orchestrator import StudentMentorOrchestrator
@@ -22,7 +24,10 @@ class QuizRequest(BaseModel):
 
 
 @router.post("", response_model=QuizResponse)
-def generate_quiz(request: QuizRequest):
+def generate_quiz(
+    request: QuizRequest,
+    current_user: User = Depends(get_current_user),
+):
     student = StudentProfile(
         name=request.student.name,
         email=request.student.email,
@@ -61,7 +66,10 @@ class QuizEvaluationRequest(BaseModel):
 
 
 @router.post("/evaluate")
-def evaluate_quiz(request: QuizEvaluationRequest):
+def evaluate_quiz(
+    request: QuizEvaluationRequest,
+    current_user: User = Depends(get_current_user),
+):
     evaluator = QuizEvaluationAgent()
 
     return evaluator.evaluate(

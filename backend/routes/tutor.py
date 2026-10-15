@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
+from backend.auth.dependencies import get_current_user
+from backend.models.user import User
 from models.skill import Skill
 from models.student import StudentProfile
 from models.tutor_schema import TutorResponse
@@ -22,7 +24,10 @@ class TutorRequest(BaseModel):
 
 
 @router.post("", response_model=TutorResponse)
-def ask_tutor(request: TutorRequest):
+def ask_tutor(
+    request: TutorRequest,
+    current_user: User = Depends(get_current_user),
+):
     student = StudentProfile(
         name=request.student.name,
         email=request.student.email,

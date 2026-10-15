@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
@@ -395,53 +396,103 @@ class TestPhase2ALearningHistory(unittest.TestCase):
         self.assertEqual(res_get_again.status_code, 404)
 
     def test_08_stateless_agent_compatibility(self):
-        """Existing agent routes continue working without authentication."""
-        # Unauthenticated assessment call
-        res_ass = self.client.post(
-            "/api/assessment",
-            json={
-                "name": "Anonymous Student",
-                "email": "anon@example.com",
+        """Existing agent routes continue working for authenticated users with mocked agents."""
+        assessment_payload = {
+            "name": "Anonymous Student",
+            "email": "anon@example.com",
+            "degree": "B.Tech",
+            "branch": "CS",
+            "current_year": 2,
+            "semester": 4,
+            "career_goal": "Software Engineer",
+            "interests": ["Python"],
+            "weekly_hours": 10,
+            "skills": [
+                {
+                    "name": "Python",
+                    "category": "Technical",
+                    "current_level": 50,
+                    "target_level": 80,
+                }
+            ],
+        }
+
+        mock_assessment_resp = {
+            "summary": {
+                "student_name": "Anonymous Student",
                 "degree": "B.Tech",
                 "branch": "CS",
                 "current_year": 2,
                 "semester": 4,
                 "career_goal": "Software Engineer",
-                "interests": ["Python"],
-                "weekly_hours": 10,
-                "skills": [
+                "weekly_study_hours": 10.0,
+            },
+            "skill_gaps": [],
+            "recommendations": [],
+        }
+
+        with patch(
+            "backend.routes.assessment.StudentMentorOrchestrator.assess_student",
+            return_value=mock_assessment_resp,
+        ) as mock_assess:
+            res_ass = self.client.post(
+                "/api/assessment",
+                headers=self.headers_a,
+                json=assessment_payload,
+            )
+            self.assertEqual(res_ass.status_code, 200)
+            mock_assess.assert_called_once()
+            self.assertEqual(
+                res_ass.json()["summary"]["student_name"],
+                "Anonymous Student",
+            )
+
+        quiz_eval_payload = {
+            "quiz": {
+                "topic": "Python",
+                "difficulty": "Medium",
+                "questions": [
                     {
-                        "name": "Python",
-                        "category": "Technical",
-                        "current_level": 50,
-                        "target_level": 80,
+                        "question": "What is 2+2?",
+                        "options": ["3", "4", "5"],
+                        "correct_answer": "4",
+                        "explanation": "Math",
                     }
                 ],
             },
-        )
-        # Should return 200 (not 401 Unauthorized)
-        self.assertEqual(res_ass.status_code, 200)
+            "student_answers": ["4"],
+        }
 
-        # Unauthenticated quiz evaluate call
-        res_eval = self.client.post(
-            "/api/quiz/evaluate",
-            json={
-                "quiz": {
-                    "topic": "Python",
-                    "difficulty": "Medium",
-                    "questions": [
-                        {
-                            "question": "What is 2+2?",
-                            "options": ["3", "4", "5"],
-                            "correct_answer": "4",
-                            "explanation": "Math",
-                        }
-                    ],
-                },
-                "student_answers": ["4"],
-            },
-        )
-        self.assertEqual(res_eval.status_code, 200)
+        mock_eval_resp = {
+            "topic": "Python",
+            "total_questions": 1,
+            "correct_answers": 1,
+            "score_percentage": 100.0,
+            "question_results": [
+                {
+                    "question": "What is 2+2?",
+                    "student_answer": "4",
+                    "correct_answer": "4",
+                    "is_correct": True,
+                    "explanation": "Math",
+                }
+            ],
+            "weak_topics": [],
+            "recommendation": "Great job!",
+        }
+
+        with patch(
+            "backend.routes.quiz.QuizEvaluationAgent.evaluate",
+            return_value=mock_eval_resp,
+        ) as mock_eval:
+            res_eval = self.client.post(
+                "/api/quiz/evaluate",
+                headers=self.headers_a,
+                json=quiz_eval_payload,
+            )
+            self.assertEqual(res_eval.status_code, 200)
+            mock_eval.assert_called_once()
+            self.assertEqual(res_eval.json()["score_percentage"], 100.0)
 
 
 if __name__ == "__main__":
