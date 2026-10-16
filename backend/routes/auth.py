@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from backend.auth.dependencies import get_current_user
 from backend.auth.jwt_handler import create_access_token
+from backend.core.rate_limit import rate_limit_ip, rate_limit_user
 from backend.database.session import get_db
 from backend.models.user import User
 from backend.schemas.auth import (
@@ -35,6 +36,13 @@ router = APIRouter(
 def register_user(
     user_data: UserCreate,
     db: Session = Depends(get_db),
+    _rate_limit: None = Depends(
+        rate_limit_ip(
+            max_requests=25,
+            window_seconds=60,
+            group="auth_register",
+        )
+    ),
 ):
     existing_user = get_user_by_email(
         db,
@@ -60,6 +68,13 @@ def register_user(
 def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db),
+    _rate_limit: None = Depends(
+        rate_limit_ip(
+            max_requests=30,
+            window_seconds=60,
+            group="auth_login",
+        )
+    ),
 ):
     user = authenticate_user(
         db,
@@ -107,6 +122,13 @@ def change_password_route(
     request: PasswordChangeRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    _rate_limit: None = Depends(
+        rate_limit_user(
+            max_requests=10,
+            window_seconds=60,
+            group="change_password",
+        )
+    ),
 ):
     success = change_password(
         db=db,
