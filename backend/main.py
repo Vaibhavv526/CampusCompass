@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.assessment import router as assessment_router
 from backend.routes.auth import router as auth_router
 from backend.routes.learning_activity import router as learning_activity_router
+from backend.routes.progress import router as progress_router
 from backend.routes.quiz import router as quiz_router
 from backend.routes.recommendation import router as recommendation_router
 from backend.routes.roadmap import router as roadmap_router
@@ -53,3 +54,4 @@ app.include_router(auth_router)
 app.include_router(student_profile_router)
 app.include_router(skills_router)
 app.include_router(learning_activity_router)
+app.include_router(progress_router)

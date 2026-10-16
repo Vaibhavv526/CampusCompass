@@ -9,6 +9,7 @@ import {
   getStudentProfile,
   getSkills,
   createLearningActivity,
+  getStudentProgress,
 } from "./api/client";
 import {
   getCurrentUser,
@@ -28,6 +29,7 @@ import RoadmapPage from "./pages/RoadmapPage";
 import TutorPage from "./pages/TutorPage";
 import StudentProfilePage from "./pages/StudentProfilePage";
 import LearningHistoryPage from "./pages/LearningHistoryPage";
+import ProgressDashboard from "./components/ProgressDashboard";
 
 
 function App() {
@@ -41,6 +43,9 @@ function App() {
   const [roadmapLoading, setRoadmapLoading] = useState(false);
   const [roadmapError, setRoadmapError] = useState("");
   const [historyWarning, setHistoryWarning] = useState("");
+  const [progress, setProgress] = useState(null);
+  const [progressLoading, setProgressLoading] = useState(false);
+  const [progressError, setProgressError] = useState("");
 const navigate = useNavigate();
 const location = useLocation();
 
@@ -105,6 +110,28 @@ const [studentSkills, setStudentSkills] = useState([]);
       isCancelled = true;
     };
   }, [currentUser, location.pathname, navigate]);
+
+  const loadProgress = async () => {
+    if (!currentUser) return;
+    setProgressLoading(true);
+    setProgressError("");
+    try {
+      const data = await getStudentProgress();
+      setProgress(data);
+    } catch (err) {
+      console.warn("Could not load student progress:", err);
+      setProgressError(err.message || "Failed to load progress analytics");
+    } finally {
+      setProgressLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser && location.pathname === "/") {
+      loadProgress();
+    }
+  }, [currentUser, location.pathname]);
+
 
   // Scoped assessment and skill analysis restoration per authenticated user ID
   useEffect(() => {
@@ -394,6 +421,14 @@ const handleRoadmap = async () => {
             practice with quizzes, and ask your AI tutor for help.
           </p>
         </section>
+
+        <ProgressDashboard
+          progress={progress}
+          loading={progressLoading}
+          error={progressError}
+          onRefresh={loadProgress}
+          navigate={navigate}
+        />
 
         <section className="dashboard-grid">
            <div className="dashboard-card">

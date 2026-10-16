@@ -175,3 +175,7 @@ export async function deleteLearningActivity(activityId) {
     method: "DELETE",
   });
 }
+
+export async function getStudentProgress() {
+  return request("/api/progress");
+}
