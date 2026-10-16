@@ -8,6 +8,7 @@ import {
   generateRoadmap,
   getStudentProfile,
   getSkills,
+  createLearningActivity,
 } from "./api/client";
 import {
   getCurrentUser,
@@ -39,6 +40,7 @@ function App() {
   const [roadmap, setRoadmap] = useState(null);
   const [roadmapLoading, setRoadmapLoading] = useState(false);
   const [roadmapError, setRoadmapError] = useState("");
+  const [historyWarning, setHistoryWarning] = useState("");
 const navigate = useNavigate();
 const location = useLocation();
 
@@ -188,8 +190,10 @@ const [studentSkills, setStudentSkills] = useState([]);
         score: null,
         data: result,
       });
+      setHistoryWarning("");
     } catch (historyErr) {
       console.warn("Could not persist assessment to user history:", historyErr);
+      setHistoryWarning("Assessment completed, but could not be saved to your learning history.");
     }
 
   } catch (error) {
@@ -237,8 +241,10 @@ const handleRoadmap = async () => {
         result._activityId = savedRoadmap.id;
         setRoadmap({ ...result, _activityId: savedRoadmap.id });
       }
+      setHistoryWarning("");
     } catch (historyErr) {
       console.warn("Could not persist roadmap to user history:", historyErr);
+      setHistoryWarning("Roadmap generated, but could not be saved to your learning history.");
     }
   } catch (error) {
     setRoadmapError(error.message);
@@ -467,6 +473,11 @@ const handleRoadmap = async () => {
         {roadmapError && (
           <div className="assessment-error">
             {roadmapError}
+          </div>
+        )}
+        {historyWarning && (
+          <div className="assessment-error" style={{ backgroundColor: "#fef3c7", color: "#92400e", borderColor: "#fde68a" }}>
+            ⚠️ {historyWarning}
           </div>
         )}
       </main>

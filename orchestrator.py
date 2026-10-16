@@ -91,15 +91,3 @@ class StudentMentorOrchestrator:
             return "intermediate"
         else:
             return "advanced"
-
-    def evaluate_quiz(
-        self,
-        quiz,
-        student_answers: list[str],
-    ):
-        """Evaluate a completed quiz."""
-
-        return self.quiz_evaluation_agent.evaluate(
-            quiz=quiz,
-            student_answers=student_answers,
-        )

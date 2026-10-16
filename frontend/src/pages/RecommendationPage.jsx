@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./RecommendationPage.css";
 import { useNavigate } from "react-router-dom";
 import {
   getStudentProfile,
   getSkills,
   getRecommendations,
+  createLearningActivity,
 } from "../api/client";
 
 function RecommendationPage() {
@@ -16,6 +17,7 @@ function RecommendationPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const hasPersistedRef = useRef(false);
 
   useEffect(() => {
     const loadRecommendations = async () => {
@@ -54,6 +56,27 @@ function RecommendationPage() {
         const result = await getRecommendations(studentData);
 
         setRecommendations(result);
+
+        // Persist recommendations to learning history once per session (non-blocking)
+        if (!hasPersistedRef.current) {
+          hasPersistedRef.current = true;
+          try {
+            const summarySnippet = result.summary
+              ? (result.summary.length > 250
+                  ? result.summary.slice(0, 250) + "..."
+                  : result.summary)
+              : "Personalized career & skill recommendations";
+            await createLearningActivity({
+              activity_type: "practice",
+              title: `Career Recommendations (${profile?.career_goal || "General"})`.slice(0, 255),
+              summary: summarySnippet.slice(0, 1000),
+              score: null,
+              data: result,
+            });
+          } catch (historyErr) {
+            console.warn("Could not persist recommendations to learning history:", historyErr);
+          }
+        }
       } catch (error) {
         setError(error.message);
       } finally {

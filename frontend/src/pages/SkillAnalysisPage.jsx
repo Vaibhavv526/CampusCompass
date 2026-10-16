@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   analyzeSkills,
+  createLearningActivity,
   getSkills,
   saveSkill,
   updateSkill as updateSkillApi,
@@ -178,6 +179,23 @@ const handleSaveChanges = async () => {
         setAnalysis(result);
         if (currentUser?.id) {
           localStorage.setItem(`skillAnalysis_${currentUser.id}`, JSON.stringify(result));
+        }
+
+        try {
+          const skillNames = skills.map((s) => s.name).join(", ");
+          const title = `Skill Gap Analysis: ${skillNames}`.slice(0, 255);
+          const summaryText = result?.summary
+            ? (result.summary.length > 250 ? result.summary.slice(0, 250) + "..." : result.summary)
+            : `${skills.length} skills analyzed for gaps and recommendations`;
+          await createLearningActivity({
+            activity_type: "assessment",
+            title,
+            summary: summaryText.slice(0, 1000),
+            score: null,
+            data: result,
+          });
+        } catch (historyErr) {
+          console.warn("Could not persist skill analysis to user history:", historyErr);
         }
     } catch (error) {
         setError(error.message);

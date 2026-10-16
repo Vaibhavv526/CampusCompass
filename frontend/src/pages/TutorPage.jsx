@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { askTutor } from "../api/client";
+import {
+  askTutor,
+  getStudentProfile,
+  getSkills,
+  createLearningActivity,
+} from "../api/client";
 import "./TutorPage.css";
 
 function TutorPage() {
@@ -11,6 +16,42 @@ function TutorPage() {
   const [answer, setAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [historyNotice, setHistoryNotice] = useState("");
+
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [studentSkills, setStudentSkills] = useState([]);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadStudentData = async () => {
+      try {
+        const [profile, skills] = await Promise.all([
+          getStudentProfile().catch((err) => {
+            console.warn("Could not fetch student profile for tutor:", err);
+            return null;
+          }),
+          getSkills().catch((err) => {
+            console.warn("Could not fetch skills for tutor:", err);
+            return [];
+          }),
+        ]);
+
+        if (!isCancelled) {
+          setStudentProfile(profile);
+          setStudentSkills(skills || []);
+        }
+      } catch (err) {
+        console.warn("Failed loading student data for tutor:", err);
+      }
+    };
+
+    loadStudentData();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const handleAskTutor = async () => {
     if (!topic.trim() || !question.trim()) {
@@ -20,49 +61,63 @@ function TutorPage() {
 
     setLoading(true);
     setError("");
+    setHistoryNotice("");
 
     try {
       const student = {
-        name: "Vaibhav",
-        email: "vaibhav@example.com",
-        degree: "B.Tech",
-        branch: "Information Technology",
-        current_year: 3,
-        semester: 5,
-        career_goal: "AI Engineer",
-        interests: ["Python", "Machine Learning", "Deep Learning"],
-        weekly_hours: 10,
-        skills: [
-          {
-            name: "Python",
-            category: "Programming",
-            current_level: 30,
-            target_level: 90,
-          },
-          {
-            name: "DSA",
-            category: "Computer Science",
-            current_level: 35,
-            target_level: 85,
-          },
-          {
-            name: "Machine Learning",
-            category: "AI",
-            current_level: 20,
-            target_level: 80,
-          },
-        ],
+        name: studentProfile?.full_name || "Student",
+        email: "",
+        degree: studentProfile?.degree || "Undergraduate",
+        branch: studentProfile?.branch || "Computer Science",
+        current_year: studentProfile?.current_year || 1,
+        semester: studentProfile?.semester || 1,
+        career_goal: studentProfile?.career_goal || "Software Engineer",
+        interests: studentProfile?.interests
+          ? studentProfile.interests
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean)
+          : [],
+        weekly_hours: studentProfile?.weekly_hours || 10,
+        skills: (studentSkills || []).map((skill) => ({
+          name: skill.name,
+          category: "Technical Skill",
+          current_level: skill.proficiency ?? 50,
+          target_level: 80,
+        })),
       };
 
       const result = await askTutor(
         student,
-        topic,
-        question
+        topic.trim(),
+        question.trim()
       );
 
-      console.log("TUTOR RESULT:", result);
-
       setAnswer(result);
+
+      // Persist completed tutor session to learning history (non-blocking)
+      try {
+        const explanationSnippet = result.explanation
+          ? (result.explanation.length > 200
+              ? result.explanation.slice(0, 200) + "..."
+              : result.explanation)
+          : `Question: ${question.trim().slice(0, 100)}`;
+
+        await createLearningActivity({
+          activity_type: "tutor",
+          title: `AI Tutor: ${topic.trim()}`.slice(0, 255),
+          summary: explanationSnippet.slice(0, 1000),
+          score: null,
+          data: {
+            topic: topic.trim(),
+            question: question.trim(),
+            answer: result,
+          },
+        });
+      } catch (historyErr) {
+        console.warn("Could not persist tutor session to learning history:", historyErr);
+        setHistoryNotice("Explanation received, but could not be saved to your learning history.");
+      }
     } catch (error) {
       setError(error.message);
     } finally {
@@ -134,6 +189,12 @@ function TutorPage() {
       {error && (
         <div className="tutor-error">
           {error}
+        </div>
+      )}
+
+      {historyNotice && (
+        <div className="tutor-error" style={{ backgroundColor: "#fef3c7", color: "#92400e", borderColor: "#fde68a" }}>
+          ⚠️ {historyNotice}
         </div>
       )}
 
