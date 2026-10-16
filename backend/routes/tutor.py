@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from backend.auth.dependencies import get_current_user
+from backend.core.rate_limit import rate_limit_user
 from backend.models.user import User
 from models.skill import Skill
 from models.student import StudentProfile
@@ -27,10 +28,11 @@ class TutorRequest(BaseModel):
 def ask_tutor(
     request: TutorRequest,
     current_user: User = Depends(get_current_user),
+    _rate_limit: None = Depends(rate_limit_user(max_requests=15, window_seconds=60, group="tutor")),
 ):
     student = StudentProfile(
-        name=request.student.name,
-        email=request.student.email,
+        name=current_user.full_name,
+        email=current_user.email,
         degree=request.student.degree,
         branch=request.student.branch,
         current_year=request.student.current_year,

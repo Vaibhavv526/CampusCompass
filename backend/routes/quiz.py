@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from backend.auth.dependencies import get_current_user
+from backend.core.rate_limit import rate_limit_user
 from backend.models.user import User
 from models.skill import Skill
 from models.quiz_schema import QuizResponse
@@ -27,10 +28,11 @@ class QuizRequest(BaseModel):
 def generate_quiz(
     request: QuizRequest,
     current_user: User = Depends(get_current_user),
+    _rate_limit: None = Depends(rate_limit_user(max_requests=15, window_seconds=60, group="quiz_generate")),
 ):
     student = StudentProfile(
-        name=request.student.name,
-        email=request.student.email,
+        name=current_user.full_name,
+        email=current_user.email,
         degree=request.student.degree,
         branch=request.student.branch,
         current_year=request.student.current_year,
@@ -58,8 +60,9 @@ def generate_quiz(
         num_questions=request.num_questions
     )
 
-
     return result
+
+
 class QuizEvaluationRequest(BaseModel):
     quiz: QuizResponse
     student_answers: list[str]
@@ -69,6 +72,7 @@ class QuizEvaluationRequest(BaseModel):
 def evaluate_quiz(
     request: QuizEvaluationRequest,
     current_user: User = Depends(get_current_user),
+    _rate_limit: None = Depends(rate_limit_user(max_requests=15, window_seconds=60, group="quiz_evaluate")),
 ):
     evaluator = QuizEvaluationAgent()
 
