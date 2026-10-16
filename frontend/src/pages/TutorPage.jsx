@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   askTutor,
   getStudentProfile,
@@ -10,9 +10,10 @@ import "./TutorPage.css";
 
 function TutorPage() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [topic, setTopic] = useState("");
-  const [question, setQuestion] = useState("");
+  const [topic, setTopic] = useState(() => location.state?.topic || "");
+  const [question, setQuestion] = useState(() => location.state?.question || "");
   const [answer, setAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -144,7 +145,7 @@ function TutorPage() {
 
           <p className="tutor-subtitle">
             Ask questions and get personalized explanations
-            based on your learning level and career goal.
+            based on your learning level, career goal, and roadmap context.
           </p>
         </div>
       </header>

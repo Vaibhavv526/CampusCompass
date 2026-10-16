@@ -3,13 +3,15 @@ from phi.model.groq import Groq
 import json
 
 from models.quiz_schema import QuizResponse
+
+
 class QuizAgent:
     """Generates personalized quizzes for a student."""
 
     def __init__(
         self,
         model_name: str = "openai/gpt-oss-20b",
-    ):  ##
+    ):
         self.model_name = model_name
         self.agent = Agent(
             model=Groq(
@@ -17,7 +19,6 @@ class QuizAgent:
                 temperature=0,
             ),
             output_schema=QuizResponse,
-            
             system_prompt=(
                 "You are a personalized quiz generation agent. "
                 "Create quizzes based on the student's topic, "
@@ -33,20 +34,33 @@ class QuizAgent:
                 "Use double quotes for all JSON keys and string values. "
                 "The JSON must be directly parseable by Python json.loads(). "
                 "Return JSON that matches the QuizResponse structure exactly. "
-                "Do not add wrapper objects or extra fields. "
+                "Do not add wrapper objects or extra fields."
             ),
             structured_outputs=True,
         )
-    ###
+
     def generate(
         self,
         topic: str,
         knowledge_level: str,
         learning_goal: str,
         num_questions: int = 5,
+        weak_areas: list[str] | None = None,
+        roadmap_milestone: str | None = None,
     ) -> QuizResponse:
-        """Generate and validate a personalized quiz."""
-        
+        """Generate and validate an adaptive personalized quiz."""
+
+        target_lines = []
+        if roadmap_milestone:
+            target_lines.append(f"- Active Roadmap Milestone: {roadmap_milestone}")
+        if weak_areas:
+            target_lines.append(f"- Student Weak Areas to Target: {', '.join(weak_areas)}")
+
+        target_block = ""
+        if target_lines:
+            joined = "\n".join(target_lines)
+            target_block = f"\nTARGET AREAS & WEAK TOPICS:\n{joined}\n"
+
         prompt = f"""
 Create a quiz for the following student.
 
@@ -58,7 +72,7 @@ KNOWLEDGE LEVEL:
 
 LEARNING GOAL:
 {learning_goal}
-
+{target_block}
 NUMBER OF QUESTIONS:
 {num_questions}
 
@@ -69,7 +83,7 @@ Requirements:
 3. Each correct_answer must exactly match one option.
 4. Include a concise explanation for every answer.
 5. Set an appropriate difficulty based on the student's knowledge level.
-6. Questions should help the student progress toward their learning goal.
+6. Questions should help the student progress toward their learning goal and address identified weak areas where applicable.
 
 7. Return exactly this JSON structure:
    {{
@@ -124,7 +138,7 @@ Requirements:
                 )
 
             content = content[start:end + 1]
-            ##
+
             try:
                 data = json.loads(content)
 
@@ -183,7 +197,6 @@ Requirements:
                         f"after repair: {repair_error}"
                     ) from repair_error
 
-
             # Normalize common model variations into QuizResponse.
             if "topic" not in data:
                 data["topic"] = topic
@@ -234,7 +247,7 @@ Requirements:
                     f"Question {index} has "
                     f"{len(question.options)} options; expected 4."
                 )
-            ##
+
             if question.correct_answer not in question.options:
                 # Try a case-insensitive match first.
                 normalized_answer = question.correct_answer.strip().lower()
@@ -274,7 +287,7 @@ Requirements:
     - Do not add punctuation.
     - Do not use markdown.
     """
-                ##
+
                 repair_agent = Agent(
                     model=Groq(
                         id=self.model_name,

@@ -6,6 +6,7 @@ from agents.quiz_evaluation_agent import QuizEvaluationAgent
 from agents.recommendation_agent import RecommendationAgent
 
 from models.student import StudentProfile
+from models.assessment_schema import LearningAssessmentResponse
 
 
 class StudentMentorOrchestrator:
@@ -22,15 +23,23 @@ class StudentMentorOrchestrator:
         self.quiz_evaluation_agent = QuizEvaluationAgent()
         self.recommendation_agent = RecommendationAgent()
 
-    def generate_quiz(self, num_questions: int = 5):
-        """Generate a personalized quiz for the current study topic."""
+    def generate_quiz(
+        self,
+        num_questions: int = 5,
+        weak_areas: list[str] | None = None,
+        roadmap_milestone: str | None = None,
+    ):
+        """Generate a personalized, adaptive quiz for the current study topic."""
 
         return self.quiz_agent.generate(
             topic=self.topic,
             knowledge_level=self._get_knowledge_level(),
             learning_goal=self.student.career_goal,
             num_questions=num_questions,
+            weak_areas=weak_areas,
+            roadmap_milestone=roadmap_milestone,
         )
+
     def evaluate_quiz(
         self,
         quiz,
@@ -42,6 +51,7 @@ class StudentMentorOrchestrator:
             quiz=quiz,
             student_answers=student_answers,
         )
+
     def assess_student(self):
         """Assess the student's current skills and learning gaps."""
 
@@ -49,9 +59,16 @@ class StudentMentorOrchestrator:
             student=self.student
         )
 
+    def generate_roadmap(self, assessment=None):
+        """Generate a personalized learning roadmap with graceful fallback for missing upstream assessment."""
 
-    def generate_roadmap(self, assessment):
-        """Generate a personalized learning roadmap."""
+        if assessment is None:
+            assessment = self.assess_student()
+        elif isinstance(assessment, dict):
+            try:
+                assessment = LearningAssessmentResponse.model_validate(assessment)
+            except Exception:
+                assessment = self.assess_student()
 
         return self.roadmap_agent.create(
             student=self.student,
@@ -65,13 +82,22 @@ class StudentMentorOrchestrator:
             student=self.student
         )
 
-    def ask_tutor(self, question: str):
-        """Get a personalized explanation from the tutor."""
+    def ask_tutor(
+        self,
+        question: str,
+        roadmap_goal: str | None = None,
+        skill_gaps: list[str] | None = None,
+        recent_history: list[str] | None = None,
+    ):
+        """Get a personalized, context-aware explanation from the tutor."""
 
         return self.tutor_agent.teach(
             student=self.student,
             topic=self.topic,
             question=question,
+            roadmap_goal=roadmap_goal,
+            skill_gaps=skill_gaps,
+            recent_history=recent_history,
         )
 
     def _get_knowledge_level(self) -> str:

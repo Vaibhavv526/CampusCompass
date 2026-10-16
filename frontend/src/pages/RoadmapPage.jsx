@@ -1,19 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../api/auth";
 import { getLearningHistory, updateLearningActivity } from "../api/client";
 import "./RoadmapPage.css";
 
 function RoadmapPage() {
-  const location = useLocation();
   const navigate = useNavigate();
-
-  const initialRoadmap = location.state?.roadmap;
-  const initialStudent = location.state?.student;
+  const location = useLocation();
 
   const [currentUser, setCurrentUser] = useState(null);
-  const [roadmap, setRoadmap] = useState(initialRoadmap || null);
-  const [student, setStudent] = useState(initialStudent || null);
+  const initialRoadmap = location.state?.roadmap || null;
+  const initialStudent = location.state?.student || null;
+
+  const [roadmap, setRoadmap] = useState(initialRoadmap);
+  const [student, setStudent] = useState(initialStudent);
   const [activityId, setActivityId] = useState(initialRoadmap?._activityId || null);
   const [steps, setSteps] = useState(initialRoadmap?.steps || []);
   const [loading, setLoading] = useState(!initialRoadmap);
@@ -134,7 +134,7 @@ function RoadmapPage() {
       );
     }
 
-    // Phase 2A: Persist milestone change to existing learning activity record (non-blocking, no duplicate entries)
+    // Persist milestone change to existing learning activity record (non-blocking, no duplicate entries)
     if (activityId) {
       try {
         const summaryText = `${completedStepsCount} of ${updatedSteps.length} steps completed (${progressPercentage}%)`;
@@ -284,10 +284,56 @@ function RoadmapPage() {
                 {step.description}
               </p>
 
+              <div style={{ marginTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+                <button
+                  type="button"
+                  style={{
+                    padding: "4px 10px",
+                    fontSize: "0.82rem",
+                    borderRadius: "4px",
+                    border: "1px solid #2563eb",
+                    backgroundColor: "#eff6ff",
+                    color: "#1d4ed8",
+                    cursor: "pointer",
+                    fontWeight: 500,
+                  }}
+                  onClick={() =>
+                    navigate("/quiz", {
+                      state: { topic: step.title },
+                    })
+                  }
+                >
+                  📝 Practice in Quiz
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    padding: "4px 10px",
+                    fontSize: "0.82rem",
+                    borderRadius: "4px",
+                    border: "1px solid #059669",
+                    backgroundColor: "#ecfdf5",
+                    color: "#047857",
+                    cursor: "pointer",
+                    fontWeight: 500,
+                  }}
+                  onClick={() =>
+                    navigate("/tutor", {
+                      state: {
+                        topic: step.title,
+                        question: `Can you explain the concepts for "${step.title}" outlined in my roadmap step: "${step.description}"?`,
+                      },
+                    })
+                  }
+                >
+                  🤖 Ask Tutor
+                </button>
+              </div>
+
               <div
                 className="roadmap-status"
                 onClick={() => toggleStep(index)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", marginTop: "12px" }}
               >
                 {step.completed ? (
                   <span className="completed">

@@ -36,8 +36,24 @@ class TutorAgent:
         student: StudentProfile,
         topic: str,
         question: str,
+        roadmap_goal: str | None = None,
+        skill_gaps: list[str] | None = None,
+        recent_history: list[str] | None = None,
     ) -> TutorResponse:
-        """Explain a topic and answer the student's question."""
+        """Explain a topic and answer the student's question with contextual learning support."""
+
+        context_lines = []
+        if roadmap_goal:
+            context_lines.append(f"- Active Roadmap Goal / Milestone: {roadmap_goal}")
+        if skill_gaps:
+            context_lines.append(f"- Identified Skill Gaps to Address: {', '.join(skill_gaps)}")
+        if recent_history:
+            context_lines.append(f"- Recent Learning History: {', '.join(recent_history)}")
+
+        context_block = ""
+        if context_lines:
+            joined = "\n".join(context_lines)
+            context_block = f"\nCURRENT LEARNING CONTEXT:\n{joined}\n"
 
         prompt = f"""
 Teach the following topic to this student.
@@ -49,7 +65,7 @@ STUDENT:
 - Current Year: {student.current_year}
 - Semester: {student.semester}
 - Career Goal: {student.career_goal}
-
+{context_block}
 QUESTION:
 {question}
 
@@ -65,6 +81,7 @@ Requirements:
 4. Provide 3-5 key points.
 5. Give one small practice task.
 6. Keep the explanation focused on the requested topic.
+7. Where relevant, connect the explanation to the student's active roadmap goal and address identified skill gaps.
 
 Return only valid JSON.
 """
