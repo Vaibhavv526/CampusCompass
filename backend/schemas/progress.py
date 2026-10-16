@@ -37,6 +37,20 @@ class SkillGapSummary(BaseModel):
     target_level: str | None = None
 
 
+class MilestoneMastery(BaseModel):
+    milestone_index: int = Field(..., ge=0)
+    title: str
+    completed: bool = False
+    skills: list[str] = Field(default_factory=list)
+    estimated_hours: float = Field(default=0.0, ge=0.0)
+    mastery_status: Literal["MASTERED", "IN_PROGRESS", "NEEDS_REVIEW", "NOT_STARTED"] = "NOT_STARTED"
+    latest_score: float | None = None
+    highest_score: float | None = None
+    attempt_count: int = Field(default=0, ge=0)
+    evidence_source: Literal["quiz", "tutor", "none"] = "none"
+    review_warning: str | None = None
+
+
 class RoadmapProgress(BaseModel):
     has_roadmap: bool = False
     title: str | None = None
@@ -48,6 +62,8 @@ class RoadmapProgress(BaseModel):
     is_tracked: bool = False
     completed_milestones_list: list[str] = Field(default_factory=list)
     pending_milestones_list: list[str] = Field(default_factory=list)
+    milestones: list[MilestoneMastery] = Field(default_factory=list)
+    recommended_focus_milestone: str | None = None
 
 
 class RecentActivitySummary(BaseModel):

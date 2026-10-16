@@ -237,21 +237,23 @@ const handleRoadmap = async () => {
   }
 
   const userAssessmentKey = currentUser?.id ? `assessment_${currentUser.id}` : null;
-  const savedAssessment = userAssessmentKey ? localStorage.getItem(userAssessmentKey) : null;
-
-  const assessmentData = assessment
-    || (savedAssessment ? JSON.parse(savedAssessment) : null);
-
-  if (!assessmentData) {
-    setRoadmapError("Please complete the assessment first.");
-    return;
+  let assessmentData = assessment;
+  if (!assessmentData && userAssessmentKey) {
+    try {
+      const savedAssessment = localStorage.getItem(userAssessmentKey);
+      if (savedAssessment) {
+        assessmentData = JSON.parse(savedAssessment);
+      }
+    } catch (e) {
+      console.warn("Failed to parse cached assessment from localStorage", e);
+    }
   }
 
   setRoadmapLoading(true);
   setRoadmapError("");
 
   try {
-    const result = await generateRoadmap(student, assessmentData);
+    const result = await generateRoadmap(student, assessmentData || null);
     setRoadmap(result);
 
     // Phase 2A: Persist new roadmap to user history (non-blocking)

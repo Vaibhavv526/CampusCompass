@@ -13,6 +13,7 @@ from backend.schemas.progress import (
     QuizAnalytics,
     TopicInsight,
     SkillGapSummary,
+    MilestoneMastery,
     RoadmapProgress,
     RecentActivitySummary,
     RecommendedAction,
@@ -196,10 +197,246 @@ def calculate_topic_insights(quiz_activities: list[LearningActivity]) -> tuple[l
     return weak_topics[:10], improving_topics[:10], topic_insights
 
 
-def calculate_roadmap_progress(roadmap_activities: list[LearningActivity]) -> RoadmapProgress | None:
-    """Analyze the latest roadmap activity to extract milestone progress and completion percentage."""
+def normalize_text(text: str | None) -> str:
+    """Normalize text by stripping, lowercasing, and removing common activity prefixes."""
+    if not text:
+        return ""
+    t = text.strip().lower()
+    for prefix in ("quiz on ", "quiz:", "practice quiz on ", "practice quiz:", "milestone:", "ai tutor:"):
+        if t.startswith(prefix):
+            t = t[len(prefix):].strip()
+    return t
+
+
+def calculate_milestone_mastery(
+    raw_steps: list[dict],
+    quiz_activities: list[LearningActivity],
+    tutor_activities: list[LearningActivity],
+    weak_topics: list[str],
+) -> list[MilestoneMastery]:
+    """
+    Deterministically correlate roadmap milestones with quiz & tutor evidence.
+
+    Mastery rules (approved Phase 3.4 product decisions):
+    1. Latest quiz score >= 70%: MASTERED
+    2. Latest quiz score < 60%, or a verified weak-topic signal: NEEDS_REVIEW
+    3. Score 60-69%: IN_PROGRESS
+    4. No reliable quiz evidence: NOT_STARTED, unless tutor activity supports IN_PROGRESS
+    5. Completed status is advisory; display review_warning when evidence indicates weak performance.
+    """
+    if not raw_steps or not isinstance(raw_steps, list):
+        return []
+
+    # Count how many steps each skill belongs to across this roadmap.
+    # A skill appearing in multiple steps is ambiguous and cannot reliably match without title/milestone match.
+    skill_step_count: dict[str, int] = defaultdict(int)
+    parsed_steps = []
+
+    for idx, step in enumerate(raw_steps):
+        if not isinstance(step, dict):
+            continue
+        title = str(
+            step.get("milestone")
+            or step.get("title")
+            or step.get("topic")
+            or f"Milestone {idx + 1}"
+        ).strip()
+        completed = bool(
+            step.get("completed") is True
+            or str(step.get("status", "")).lower() in ("completed", "done")
+        )
+        raw_skills = step.get("skills", [])
+        if isinstance(raw_skills, list):
+            skills = [str(s).strip() for s in raw_skills if s and str(s).strip()]
+        elif isinstance(raw_skills, str):
+            skills = [s.strip() for s in raw_skills.split(",") if s.strip()]
+        else:
+            skills = []
+
+        try:
+            hours = float(step.get("estimated_hours", 0.0) or 0.0)
+        except (ValueError, TypeError):
+            hours = 0.0
+
+        for s in skills:
+            skill_step_count[normalize_text(s)] += 1
+
+        parsed_steps.append({
+            "index": idx,
+            "title": title,
+            "norm_title": normalize_text(title),
+            "completed": completed,
+            "skills": skills,
+            "norm_skills": [normalize_text(s) for s in skills],
+            "hours": hours,
+        })
+
+    norm_weak_topics = {normalize_text(w) for w in weak_topics if w}
+
+    milestone_mastery_list: list[MilestoneMastery] = []
+
+    for p_step in parsed_steps:
+        m_index = p_step["index"]
+        m_title = p_step["title"]
+        m_norm_title = p_step["norm_title"]
+        m_completed = p_step["completed"]
+        m_skills = p_step["skills"]
+        m_norm_skills = p_step["norm_skills"]
+        m_hours = p_step["hours"]
+
+        # Match quizzes to milestones
+        matched_quizzes: list[LearningActivity] = []
+        for q in quiz_activities:
+            q_data = q.data if isinstance(q.data, dict) else {}
+            q_milestone = normalize_text(q_data.get("milestone"))
+            q_topic = normalize_text(q_data.get("topic"))
+            if not q_topic and q.title:
+                q_topic = normalize_text(q.title)
+
+            # Match 1: Explicit milestone name in quiz data
+            if q_milestone and q_milestone == m_norm_title:
+                matched_quizzes.append(q)
+                continue
+
+            # Match 2: Quiz topic exactly equals milestone title
+            if q_topic and q_topic == m_norm_title:
+                matched_quizzes.append(q)
+                continue
+
+            # Match 3: Quiz topic matches a unique milestone skill (no cross-step ambiguity)
+            if q_topic and q_topic in m_norm_skills:
+                if skill_step_count.get(q_topic, 0) == 1:
+                    matched_quizzes.append(q)
+                    continue
+
+        # Sort matched quizzes chronologically (oldest to newest)
+        matched_quizzes.sort(key=lambda x: getattr(x, "created_at", None) or datetime.min.replace(tzinfo=timezone.utc))
+
+        # Check for weak-topic signal
+        has_weak_signal = (
+            m_norm_title in norm_weak_topics
+            or any(s in norm_weak_topics for s in m_norm_skills)
+        )
+
+        attempt_count = len(matched_quizzes)
+        latest_score: float | None = None
+        highest_score: float | None = None
+        mastery_status = "NOT_STARTED"
+        evidence_source = "none"
+
+        if attempt_count > 0:
+            evidence_source = "quiz"
+            scores: list[float] = []
+            for q in matched_quizzes:
+                s_val = None
+                if q.score is not None:
+                    try:
+                        s_val = float(q.score)
+                    except (ValueError, TypeError):
+                        pass
+                if s_val is None and q.data and isinstance(q.data, dict):
+                    eval_d = q.data.get("evaluation")
+                    if isinstance(eval_d, dict) and eval_d.get("score") is not None:
+                        try:
+                            s_val = float(eval_d["score"])
+                        except (ValueError, TypeError):
+                            pass
+                if s_val is not None:
+                    scores.append(round(s_val, 1))
+
+            if scores:
+                latest_score = scores[-1]
+                highest_score = max(scores)
+
+            # Check if latest quiz specifically flagged weak topics for this milestone
+            latest_quiz = matched_quizzes[-1]
+            if latest_quiz.data and isinstance(latest_quiz.data, dict):
+                eval_dict = latest_quiz.data.get("evaluation")
+                if isinstance(eval_dict, dict):
+                    q_weaks = [normalize_text(w) for w in eval_dict.get("weak_topics", []) if w]
+                    if m_norm_title in q_weaks or any(s in q_weaks for s in m_norm_skills):
+                        has_weak_signal = True
+
+            # Determine mastery status
+            if latest_score is not None:
+                if latest_score < 60.0 or has_weak_signal:
+                    mastery_status = "NEEDS_REVIEW"
+                elif latest_score >= 70.0:
+                    mastery_status = "MASTERED"
+                else:  # 60 <= latest_score < 70
+                    mastery_status = "IN_PROGRESS"
+            else:
+                mastery_status = "NEEDS_REVIEW" if has_weak_signal else "IN_PROGRESS"
+        else:
+            # Check tutor activities for in-progress evidence
+            matched_tutors = []
+            for t in tutor_activities:
+                t_data = t.data if isinstance(t.data, dict) else {}
+                t_topic = normalize_text(t_data.get("topic") or t.title)
+                t_milestone = normalize_text(t_data.get("milestone"))
+                if t_milestone and t_milestone == m_norm_title:
+                    matched_tutors.append(t)
+                elif t_topic and t_topic == m_norm_title:
+                    matched_tutors.append(t)
+                elif t_topic and t_topic in m_norm_skills and skill_step_count.get(t_topic, 0) == 1:
+                    matched_tutors.append(t)
+
+            if matched_tutors:
+                evidence_source = "tutor"
+                mastery_status = "IN_PROGRESS"
+            else:
+                evidence_source = "none"
+                mastery_status = "NOT_STARTED"
+
+        # Advisory review warning if completed but weak
+        review_warning: str | None = None
+        if m_completed and mastery_status == "NEEDS_REVIEW":
+            if latest_score is not None:
+                review_warning = (
+                    f"Milestone is marked completed, but recorded quiz evidence indicates "
+                    f"review is recommended (Latest Score: {round(latest_score)}%)."
+                )
+            else:
+                review_warning = (
+                    "Milestone is marked completed, but recorded quiz evaluation "
+                    "indicates this area needs review."
+                )
+
+        milestone_mastery_list.append(
+            MilestoneMastery(
+                milestone_index=m_index,
+                title=m_title,
+                completed=m_completed,
+                skills=m_skills,
+                estimated_hours=m_hours,
+                mastery_status=mastery_status,
+                latest_score=latest_score,
+                highest_score=highest_score,
+                attempt_count=attempt_count,
+                evidence_source=evidence_source,
+                review_warning=review_warning,
+            )
+        )
+
+    return milestone_mastery_list
+
+
+def calculate_roadmap_progress(
+    roadmap_activities: list[LearningActivity],
+    quiz_activities: list[LearningActivity] | None = None,
+    tutor_activities: list[LearningActivity] | None = None,
+    weak_topics: list[str] | None = None,
+) -> RoadmapProgress | None:
+    """Analyze the latest roadmap activity to extract milestone progress, completion percentage, and mastery intelligence."""
     if not roadmap_activities:
         return None
+
+    if quiz_activities is None:
+        quiz_activities = []
+    if tutor_activities is None:
+        tutor_activities = []
+    if weak_topics is None:
+        weak_topics = []
 
     latest_roadmap = roadmap_activities[-1]
     data = latest_roadmap.data if isinstance(latest_roadmap.data, dict) else {}
@@ -216,29 +453,22 @@ def calculate_roadmap_progress(roadmap_activities: list[LearningActivity]) -> Ro
             next_milestone=None,
             completed_milestones_list=[],
             pending_milestones_list=[],
+            milestones=[],
+            recommended_focus_milestone=None,
         )
 
-    completed_list: list[str] = []
-    pending_list: list[str] = []
+    # Calculate deterministic milestone mastery
+    milestones = calculate_milestone_mastery(
+        raw_steps=raw_steps,
+        quiz_activities=quiz_activities,
+        tutor_activities=tutor_activities,
+        weak_topics=weak_topics,
+    )
 
-    for step in raw_steps:
-        if isinstance(step, dict):
-            name = (
-                step.get("milestone")
-                or step.get("title")
-                or step.get("topic")
-                or "Milestone"
-            )
-            is_completed = bool(
-                step.get("completed") is True
-                or str(step.get("status", "")).lower() in ("completed", "done")
-            )
-            if is_completed:
-                completed_list.append(str(name).strip())
-            else:
-                pending_list.append(str(name).strip())
+    completed_list: list[str] = [m.title for m in milestones if m.completed]
+    pending_list: list[str] = [m.title for m in milestones if not m.completed]
 
-    total_m = len(completed_list) + len(pending_list)
+    total_m = len(milestones)
     completed_m = len(completed_list)
     remaining_m = len(pending_list)
 
@@ -248,6 +478,18 @@ def calculate_roadmap_progress(roadmap_activities: list[LearningActivity]) -> Ro
         pct = 0.0
 
     next_milestone = pending_list[0] if pending_list else None
+
+    # Adaptive recommended focus milestone:
+    # 1. Prioritize completed milestones that have reliable NEEDS_REVIEW evidence
+    # 2. Otherwise recommend the next pending milestone
+    recommended_focus: str | None = None
+    for m in milestones:
+        if m.completed and m.mastery_status == "NEEDS_REVIEW":
+            recommended_focus = m.title
+            break
+
+    if not recommended_focus:
+        recommended_focus = next_milestone
 
     return RoadmapProgress(
         has_roadmap=True,
@@ -259,6 +501,8 @@ def calculate_roadmap_progress(roadmap_activities: list[LearningActivity]) -> Ro
         next_milestone=next_milestone,
         completed_milestones_list=completed_list,
         pending_milestones_list=pending_list,
+        milestones=milestones,
+        recommended_focus_milestone=recommended_focus,
     )
 
 
@@ -302,7 +546,26 @@ def generate_recommended_actions(
     """Generate deterministic, evidence-based recommendations for next student actions."""
     actions: list[RecommendedAction] = []
 
-    # Priority 1: Weak topics identified from recent quizzes (urgent intervention)
+    # Priority 1A: Adaptive Roadmap Review - Completed milestones with reliable NEEDS_REVIEW evidence
+    if roadmap_progress and roadmap_progress.has_roadmap:
+        for m in roadmap_progress.milestones:
+            if m.completed and m.mastery_status == "NEEDS_REVIEW":
+                score_str = f"recorded quiz score was {round(m.latest_score)}%" if m.latest_score is not None else "recorded quiz evidence indicates this is a weak area"
+                actions.append(
+                    RecommendedAction(
+                        priority=1,
+                        action_type="milestone_review",
+                        title=f"Review Completed Milestone: '{m.title}'",
+                        description=f"You marked '{m.title}' as completed, but your {score_str}. Review concepts before advancing.",
+                        target_route="/quiz",
+                        context={
+                            "topic": m.title,
+                            "milestone": m.title,
+                        },
+                    )
+                )
+
+    # Priority 1B: Weak topics identified from recent quizzes (urgent intervention)
     if weak_topics:
         top_weak = weak_topics[0]
         actions.append(
@@ -456,8 +719,14 @@ def calculate_student_progress(
     # 2. Topic Insights & Weak Topics
     weak_topics, improving_topics, topic_insights = calculate_topic_insights(quiz_activities)
 
-    # 3. Roadmap Progress
-    roadmap_progress = calculate_roadmap_progress(roadmap_activities)
+    # 3. Roadmap Progress (with deterministic milestone mastery correlation)
+    tutor_activities = [a for a in activities if a.activity_type == "tutor"]
+    roadmap_progress = calculate_roadmap_progress(
+        roadmap_activities=roadmap_activities,
+        quiz_activities=quiz_activities,
+        tutor_activities=tutor_activities,
+        weak_topics=weak_topics,
+    )
 
     # 4. Skill Gaps from Assessment
     skill_gaps = extract_skill_gaps(assessment_activities)
