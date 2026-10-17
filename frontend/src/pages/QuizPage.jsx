@@ -14,6 +14,7 @@ function QuizPage() {
   const location = useLocation();
 
   const [topic, setTopic] = useState(() => location.state?.topic || "");
+  const [milestone] = useState(() => location.state?.milestone || null);
   const [quiz, setQuiz] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [result, setResult] = useState(null);
@@ -136,6 +137,7 @@ function QuizPage() {
           score: Math.min(100.0, Math.max(0.0, scoreVal)),
           data: {
             topic: topic.trim(),
+            milestone: milestone || null,
             quiz: quiz,
             answers: answers,
             evaluation: evaluation,
@@ -310,6 +312,7 @@ function QuizPage() {
                         navigate("/tutor", {
                           state: {
                             topic: weakTopic,
+                            milestone: milestone || null,
                             question: `Can you explain the key concepts of ${weakTopic} and give examples to help me improve on what I missed in my quiz?`,
                           },
                         })
@@ -337,6 +340,7 @@ function QuizPage() {
                     navigate("/tutor", {
                       state: {
                         topic: result.weak_topics[0],
+                        milestone: milestone || null,
                         question: `Can you explain the key concepts of ${result.weak_topics[0]} and guide me on how to master them?`,
                       },
                     })

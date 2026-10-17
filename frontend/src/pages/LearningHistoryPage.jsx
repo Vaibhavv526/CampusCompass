@@ -93,7 +93,7 @@ function LearningHistoryPage() {
           setCurrentUser(user);
           setAuthChecking(false);
         }
-      } catch (err) {
+      } catch {
         if (!isCancelled) {
           logoutUser();
           setCurrentUser(null);
@@ -165,20 +165,33 @@ function LearningHistoryPage() {
 
   // Fetch whenever authenticated user is verified or filter changes
   useEffect(() => {
+    let isCancelled = false;
+    const reqRef = activeRequestIdRef;
+
     if (!currentUser?.id) {
-      setActivities([]);
-      setSelectedActivity(null);
-      return;
+      Promise.resolve().then(() => {
+        if (!isCancelled) {
+          setActivities([]);
+          setSelectedActivity(null);
+        }
+      });
+      return () => {
+        isCancelled = true;
+      };
     }
 
-    setActivities([]);
-    setError("");
-    setHasMore(false);
-    fetchActivities(filter, 0, false);
+    Promise.resolve().then(() => {
+      if (!isCancelled) {
+        setActivities([]);
+        setError("");
+        setHasMore(false);
+        fetchActivities(filter, 0, false);
+      }
+    });
 
     return () => {
-      // Invalidate in-flight requests on filter change or unmount
-      activeRequestIdRef.current++;
+      isCancelled = true;
+      reqRef.current++;
     };
   }, [currentUser?.id, filter, fetchActivities]);
 
@@ -201,7 +214,7 @@ function LearningHistoryPage() {
       if (selectedActivityIdRef.current === activity.id) {
         setSelectedActivity(fullActivity);
       }
-    } catch (err) {
+    } catch {
       if (selectedActivityIdRef.current === activity.id) {
         setModalError("Could not refresh full activity details. Showing cached summary.");
       }

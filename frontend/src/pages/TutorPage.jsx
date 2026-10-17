@@ -14,6 +14,7 @@ function TutorPage() {
 
   const [topic, setTopic] = useState(() => location.state?.topic || "");
   const [question, setQuestion] = useState(() => location.state?.question || "");
+  const [milestone] = useState(() => location.state?.milestone || null);
   const [answer, setAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -111,6 +112,7 @@ function TutorPage() {
           score: null,
           data: {
             topic: topic.trim(),
+            milestone: milestone || null,
             question: question.trim(),
             answer: result,
           },
@@ -233,6 +235,48 @@ function TutorPage() {
             <h3>🎯 Practice Task</h3>
 
             <p>{answer.practice_task}</p>
+          </div>
+
+          <div className="tutor-followup-actions" style={{ display: "flex", gap: "12px", marginTop: "24px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="tutor-action-btn tutor-practice-btn"
+              onClick={() =>
+                navigate("/quiz", {
+                  state: {
+                    topic: answer.topic || topic,
+                    milestone: milestone || null,
+                  },
+                })
+              }
+              style={{
+                backgroundColor: "#2563eb",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
+                padding: "10px 18px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              📝 Practice in Quiz
+            </button>
+            <button
+              type="button"
+              className="tutor-action-btn tutor-roadmap-btn"
+              onClick={() => navigate("/roadmap")}
+              style={{
+                backgroundColor: "#f3f4f6",
+                color: "#374151",
+                border: "1px solid #d1d5db",
+                borderRadius: "8px",
+                padding: "10px 18px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              🗺️ Return to Roadmap
+            </button>
           </div>
         </section>
       )}

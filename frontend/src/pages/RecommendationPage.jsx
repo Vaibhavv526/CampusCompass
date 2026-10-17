@@ -11,8 +11,6 @@ import {
 function RecommendationPage() {
   const navigate = useNavigate();
 
-  const [student, setStudent] = useState(null);
-  const [skills, setSkills] = useState([]);
   const [recommendations, setRecommendations] = useState(null);
 
   const [loading, setLoading] = useState(true);
@@ -26,9 +24,6 @@ function RecommendationPage() {
           getStudentProfile(),
           getSkills(),
         ]);
-
-        setStudent(profile);
-        setSkills(savedSkills);
 
         const studentData = {
           name: profile.full_name,

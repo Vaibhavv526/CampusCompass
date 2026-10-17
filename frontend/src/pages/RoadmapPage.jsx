@@ -511,6 +511,7 @@ function RoadmapPage() {
                       navigate("/tutor", {
                         state: {
                           topic: step.title,
+                          milestone: step.title,
                           question: `Can you explain the concepts for "${step.title}" outlined in my roadmap step: "${step.description}"?`,
                         },
                       })

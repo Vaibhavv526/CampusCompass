@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import SkillAnalysisPage from "./pages/SkillAnalysisPage";
 import "./App.css";
 import RecommendationPage from "./pages/RecommendationPage";
@@ -9,6 +9,7 @@ import {
   getStudentProfile,
   getSkills,
   createLearningActivity,
+  getLearningHistory,
   getStudentProgress,
 } from "./api/client";
 import {
@@ -66,7 +67,7 @@ const [studentSkills, setStudentSkills] = useState([]);
         if (!isCancelled) {
           setCurrentUser(user);
         }
-      } catch (error) {
+      } catch {
         if (!isCancelled) {
           logoutUser();
           setCurrentUser(null);
@@ -111,7 +112,7 @@ const [studentSkills, setStudentSkills] = useState([]);
     };
   }, [currentUser, location.pathname, navigate]);
 
-  const loadProgress = async () => {
+  const loadProgress = useCallback(async () => {
     if (!currentUser) return;
     setProgressLoading(true);
     setProgressError("");
@@ -124,30 +125,105 @@ const [studentSkills, setStudentSkills] = useState([]);
     } finally {
       setProgressLoading(false);
     }
-  };
+  }, [currentUser]);
 
   useEffect(() => {
-    if (currentUser && location.pathname === "/") {
-      loadProgress();
+    if (!currentUser || location.pathname !== "/") {
+      return;
     }
+    let isCancelled = false;
+
+    Promise.resolve().then(async () => {
+      if (isCancelled) return;
+      setProgressLoading(true);
+      setProgressError("");
+      try {
+        const data = await getStudentProgress();
+        if (!isCancelled) {
+          setProgress(data);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          console.warn("Could not load student progress:", err);
+          setProgressError(err.message || "Failed to load progress analytics");
+        }
+      } finally {
+        if (!isCancelled) {
+          setProgressLoading(false);
+        }
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [currentUser, location.pathname]);
 
 
   // Scoped assessment and skill analysis restoration per authenticated user ID
   useEffect(() => {
+    let isCancelled = false;
+
     if (!currentUser?.id) {
-      setAssessment(null);
-      setSkillAnalysis(null);
-      return;
+      Promise.resolve().then(() => {
+        if (!isCancelled) {
+          setAssessment(null);
+          setSkillAnalysis(null);
+        }
+      });
+      return () => {
+        isCancelled = true;
+      };
     }
 
-    const userAssessmentKey = `assessment_${currentUser.id}`;
-    const savedAssessment = localStorage.getItem(userAssessmentKey);
-    setAssessment(savedAssessment ? JSON.parse(savedAssessment) : null);
+    Promise.resolve().then(async () => {
+      const userAssessmentKey = `assessment_${currentUser.id}`;
+      let cachedAssessment = null;
+      try {
+        const raw = localStorage.getItem(userAssessmentKey);
+        if (raw) cachedAssessment = JSON.parse(raw);
+      } catch (e) {
+        console.warn("Failed to parse cached assessment", e);
+      }
 
-    const userSkillKey = `skillAnalysis_${currentUser.id}`;
-    const savedSkillAnalysis = localStorage.getItem(userSkillKey);
-    setSkillAnalysis(savedSkillAnalysis ? JSON.parse(savedSkillAnalysis) : null);
+      // Fallback: restore from authenticated learning history if absent in localStorage
+      if (!cachedAssessment) {
+        try {
+          const historyItems = await getLearningHistory({
+            activity_type: "assessment",
+            limit: 1,
+          });
+          if (historyItems && historyItems.length > 0 && historyItems[0].data) {
+            cachedAssessment = historyItems[0].data;
+            try {
+              localStorage.setItem(userAssessmentKey, JSON.stringify(cachedAssessment));
+            } catch (e) {
+              console.warn("Failed to cache retrieved assessment to localStorage", e);
+            }
+          }
+        } catch (e) {
+          console.warn("Could not fetch assessment from learning history", e);
+        }
+      }
+
+      const userSkillKey = `skillAnalysis_${currentUser.id}`;
+      let cachedSkillAnalysis = null;
+      try {
+        const raw = localStorage.getItem(userSkillKey);
+        if (raw) cachedSkillAnalysis = JSON.parse(raw);
+      } catch (e) {
+        console.warn("Failed to parse cached skill analysis", e);
+      }
+
+      if (!isCancelled) {
+        setAssessment(cachedAssessment);
+        setSkillAnalysis(cachedSkillAnalysis);
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [currentUser?.id]);
 
   useEffect(() => {
@@ -440,12 +516,44 @@ const handleRoadmap = async () => {
               Analyze your current skills and identify learning gaps.
             </p>
 
-            <button
-              onClick={handleAssessment}
-              disabled={assessmentLoading}
-            >
-              {assessmentLoading ? "Generating..." : "Start Assessment"}
-            </button>
+            {assessment ? (
+              <div className="card-action-group" style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "12px" }}>
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate("/assessment", {
+                      state: {
+                        assessment,
+                        student,
+                      },
+                    })
+                  }
+                >
+                  View Assessment
+                </button>
+                <button
+                  type="button"
+                  className="secondary-action-btn"
+                  onClick={handleAssessment}
+                  disabled={assessmentLoading}
+                  style={{
+                    backgroundColor: "#f3f4f6",
+                    color: "#374151",
+                    border: "1px solid #d1d5db",
+                  }}
+                >
+                  {assessmentLoading ? "Generating..." : "Retake Assessment"}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAssessment}
+                disabled={assessmentLoading}
+              >
+                {assessmentLoading ? "Generating..." : "Start Assessment"}
+              </button>
+            )}
           </div>
           <div className="dashboard-card">
             <h3>🧠 Skill Analysis</h3>
@@ -507,6 +615,11 @@ const handleRoadmap = async () => {
         </section>
 
 
+        {assessmentError && (
+          <div className="assessment-error">
+            {assessmentError}
+          </div>
+        )}
         {roadmapError && (
           <div className="assessment-error">
             {roadmapError}
