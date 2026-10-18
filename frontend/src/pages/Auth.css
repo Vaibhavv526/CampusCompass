@@ -75,12 +75,48 @@
   border-radius: 10px;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.auth-field input::placeholder {
+  color: var(--input-placeholder, var(--text-muted));
+  opacity: 1;
 }
 
 .auth-field input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  border-color: var(--input-focus-border, #2563eb);
+  box-shadow: 0 0 0 3px var(--input-focus-ring, rgba(37, 99, 235, 0.15));
+}
+
+/* Browser autofill support for both light and dark themes */
+.auth-field input:-webkit-autofill,
+.auth-field input:-webkit-autofill:hover,
+.auth-field input:-webkit-autofill:focus,
+.auth-field input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+  -webkit-text-fill-color: var(--input-text) !important;
+  caret-color: var(--input-text);
+  border-color: var(--input-border, var(--border-color));
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.auth-field input:-webkit-autofill:focus {
+  border-color: var(--input-focus-border, #2563eb) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset, 0 0 0 3px var(--input-focus-ring, rgba(37, 99, 235, 0.15)) !important;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset, 0 0 0 3px var(--input-focus-ring, rgba(37, 99, 235, 0.15)) !important;
+}
+
+.auth-field input:autofill {
+  box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  -webkit-text-fill-color: var(--input-text);
+  caret-color: var(--input-text);
+  border-color: var(--input-border, var(--border-color));
+}
+
+.auth-field input:autofill:focus {
+  border-color: var(--input-focus-border, #2563eb);
+  box-shadow: 0 0 0 1000px var(--input-bg) inset, 0 0 0 3px var(--input-focus-ring, rgba(37, 99, 235, 0.15));
 }
 
 .auth-submit-button {
@@ -332,6 +368,19 @@
 }
 
 .password-toggle-btn:hover {
-  color: #2563eb;
-  background: #eff6ff;
+  color: var(--accent-primary);
+  background: var(--accent-subtle);
+}
+
+
+[data-theme="dark"] .auth-error {
+  background: var(--status-error-bg);
+  color: var(--status-error-text);
+  border-color: var(--status-error-border);
+}
+
+[data-theme="dark"] .auth-success {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  border-color: var(--status-success-border);
 }

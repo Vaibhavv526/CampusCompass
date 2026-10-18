@@ -3,6 +3,7 @@
 }
 
 :root {
+  color-scheme: light;
   /* Surface & backgrounds */
   --bg-app: #f8fafc;
   --bg-page-alt: #f5f7fb;
@@ -81,6 +82,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   /* Surface & backgrounds */
   --bg-app: #0b0f19;
   --bg-page-alt: #0b0f19;

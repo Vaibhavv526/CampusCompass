@@ -1,6 +1,8 @@
+import { useState } from "react";
 import "./ProgressDashboard.css";
 
 export function ProgressDashboard({ progress, loading, error, onRefresh, navigate }) {
+  const [isExpanded, setIsExpanded] = useState(false);
   if (loading) {
     return (
       <section className="progress-dashboard-container loading" aria-busy="true">
@@ -57,23 +59,49 @@ export function ProgressDashboard({ progress, loading, error, onRefresh, navigat
   const { quiz_analytics, roadmap_progress, weak_topics, improving_topics, recommended_actions, recent_activities } = progress;
 
   return (
-    <section className="progress-dashboard-container">
+    <section
+      className={`progress-dashboard-container ${isExpanded ? "expanded" : "collapsed"}`}
+      aria-label="Learning Progress and Intelligence"
+    >
       <div className="progress-header">
-        <div className="progress-header-title">
-          <h2>🎯 Learning Progress & Intelligence</h2>
-          <span className="progress-badge-activities">
-            {progress.total_activities} activities tracked
-          </span>
-        </div>
         <button
           type="button"
-          onClick={onRefresh}
+          className="progress-header-toggle"
+          onClick={() => setIsExpanded((prev) => !prev)}
+          aria-expanded={isExpanded}
+          aria-controls="progress-dashboard-content"
+          id="progress-dashboard-toggle"
+        >
+          <div className="progress-header-title">
+            <h2>🎯 Learning Progress & Intelligence</h2>
+            <span className="progress-badge-activities">
+              {progress.total_activities} activities tracked
+            </span>
+          </div>
+          <span className="progress-toggle-indicator">
+            {isExpanded ? "Collapse ▲" : "Expand ▼"}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRefresh();
+          }}
           className="progress-refresh-btn"
           title="Refresh analytics"
+          aria-label="Refresh progress analytics"
         >
           🔄 Refresh
         </button>
       </div>
+
+      <div
+        id="progress-dashboard-content"
+        className="progress-dashboard-content"
+        hidden={!isExpanded}
+      >
 
       {/* 1. Key Metrics Overview */}
       <div className="progress-metrics-grid">
@@ -298,6 +326,7 @@ export function ProgressDashboard({ progress, loading, error, onRefresh, navigat
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }
