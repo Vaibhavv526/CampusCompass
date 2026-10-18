@@ -4,68 +4,221 @@
 
 .app {
   min-height: 100vh;
-  background: #f5f7fb;
-  color: #172033;
+  background: #f8fafc;
+  color: #0f172a;
 }
 
-.dashboard-header {
+/* =========================================================
+   Professional SaaS Navbar
+   ========================================================= */
+
+.dashboard-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 24px 48px;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 32px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
-.dashboard-header h1 {
-  margin: 0;
-  font-size: 28px;
-}
-
-.dashboard-header p {
-  margin: 6px 0 0;
-  color: #6b7280;
-}
-
-.student-badge {
+.navbar-brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 600;
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+  user-select: none;
 }
 
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #2563eb;
-  color: white;
+.navbar-brand:hover {
+  background-color: #f8fafc;
+}
+
+.navbar-brand:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #dbeafe;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
+
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  font-family: inherit;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.nav-history-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.nav-history-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.nav-history-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb;
+}
+
+.nav-btn-icon {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: color 0.15s ease;
+}
+
+.nav-history-btn:hover .nav-btn-icon {
+  color: #2563eb;
+}
+
+/* Profile Control: Combines authenticated user name and Profile & Settings */
+.profile-control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 3px 12px 3px 4px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+
+.profile-control-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.profile-control-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb;
+}
+
+.profile-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Logout Button */
+.nav-logout-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.nav-logout-btn:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+}
+
+.nav-logout-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #dc2626;
+}
+
+/* =========================================================
+   Dashboard Main Container & Header
+   ========================================================= */
 
 .dashboard {
-  max-width: 1200px;
+  max-width: 1160px;
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 24px 24px 48px;
 }
 
-.welcome-section {
-  margin-bottom: 32px;
+.learning-overview-header {
+  margin-bottom: 20px;
 }
 
-.welcome-section h2 {
-  margin: 0 0 8px;
-  font-size: 32px;
+.learning-overview-header h2 {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
 }
 
-.welcome-section p {
-  max-width: 720px;
-  color: #667085;
-  line-height: 1.6;
+.learning-overview-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
+/* Dashboard Grid Cards refinement */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -74,41 +227,90 @@
 
 .dashboard-card {
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dashboard-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 
 .dashboard-card h3 {
   margin-top: 0;
-  font-size: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .dashboard-card p {
-  color: #667085;
+  color: #64748b;
   line-height: 1.5;
-  min-height: 48px;
+  font-size: 14px;
+  min-height: 44px;
+  margin: 8px 0 16px;
 }
 
 .dashboard-card button {
-  margin-top: 12px;
   border: none;
   border-radius: 8px;
-  padding: 10px 16px;
+  padding: 9px 15px;
   background: #2563eb;
-  color: white;
+  color: #ffffff;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
-.dashboard-card button:hover {
+.dashboard-card button:hover:not(:disabled) {
   background: #1d4ed8;
 }
 
-@media (max-width: 700px) {
-  .dashboard-header {
-    padding: 20px;
+.dashboard-card button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb;
+}
+
+.dashboard-card button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 820px) {
+  .dashboard-navbar {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 680px) {
+  .dashboard-navbar {
+    padding: 0 16px;
+    height: 58px;
+  }
+
+  .brand-name {
+    font-size: 16px;
+  }
+
+  .nav-btn {
+    padding: 0 10px;
+    font-size: 12px;
+    height: 34px;
+  }
+
+  .profile-control-btn {
+    height: 34px;
+    padding: 2px 10px 2px 3px;
+  }
+
+  .profile-name {
+    max-width: 90px;
+    font-size: 12px;
   }
 
   .dashboard-grid {
@@ -116,7 +318,34 @@
   }
 
   .dashboard {
-    padding: 32px 16px;
+    padding: 20px 16px 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-actions {
+    gap: 6px;
+  }
+
+  .nav-btn-text {
+    display: none;
+  }
+
+  .nav-history-btn {
+    padding: 0 9px;
+  }
+
+  .profile-name {
+    display: none;
+  }
+
+  .profile-control-btn {
+    padding: 2px;
+    border-radius: 50%;
+  }
+
+  .brand-name {
+    font-size: 15px;
   }
 }
 
@@ -1377,43 +1606,4 @@
   .roadmap-hours {
     align-self: flex-start;
   }
-}
-.logout-button {
-  margin-left: 12px;
-  padding: 7px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  color: #334155;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.logout-button:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
-}
-.profile-button,
-.history-button {
-  margin-left: 8px;
-  padding: 7px 12px;
-  border: 1px solid #93c5fd;
-  border-radius: 8px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.profile-button:hover,
-.history-button:hover {
-  background: #dbeafe;
-  border-color: #60a5fa;
 }

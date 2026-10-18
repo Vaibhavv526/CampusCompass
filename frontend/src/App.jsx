@@ -3,7 +3,6 @@ import SkillAnalysisPage from "./pages/SkillAnalysisPage";
 import "./App.css";
 import RecommendationPage from "./pages/RecommendationPage";
 import {
-  checkHealth,
   generateAssessment,
   generateRoadmap,
   getStudentProfile,
@@ -34,7 +33,6 @@ import ProgressDashboard from "./components/ProgressDashboard";
 
 
 function App() {
-  const [apiStatus, setApiStatus] = useState("Checking backend...");
   const [assessment, setAssessment] = useState(null);
   const [skillAnalysis, setSkillAnalysis] = useState(null);
   const [showAssessmentPopup, setShowAssessmentPopup] = useState(false);
@@ -226,16 +224,6 @@ const [studentSkills, setStudentSkills] = useState([]);
     };
   }, [currentUser?.id]);
 
-  useEffect(() => {
-    checkHealth()
-      .then(() => {
-        setApiStatus("Backend connected");
-      })
-      .catch(() => {
-        setApiStatus("Backend unavailable");
-      });
-  }, []);
-
   const student = studentProfile
   ? {
       name: studentProfile.full_name,
@@ -376,45 +364,89 @@ const handleRoadmap = async () => {
         path="/"
         element={
     <div className="app">
-      <header className="dashboard-header">
-        <div>
-          <h1>AI Student Mentor</h1>
-          <p>Your personalized learning companion</p>
-          <p className="api-status">{apiStatus}</p>
+      <header className="dashboard-navbar" role="banner">
+        <div
+          className="navbar-brand"
+          onClick={() => navigate("/")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              navigate("/");
+            }
+          }}
+          tabIndex={0}
+          role="button"
+          aria-label="CampusCompass Dashboard"
+        >
+          <div className="brand-logo" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" fillOpacity="0.25" />
+            </svg>
+          </div>
+          <span className="brand-name">CampusCompass</span>
         </div>
 
-        <div className="student-badge">
-  <span className="avatar">
-    {currentUser?.full_name?.charAt(0).toUpperCase() || "U"}
-  </span>
+        <nav className="navbar-actions" aria-label="Dashboard navigation">
+          <button
+            type="button"
+            className="nav-btn nav-history-btn"
+            onClick={() => navigate("/learning-history")}
+            title="View your saved learning activities"
+            aria-label="Learning History"
+          >
+            <svg
+              className="nav-btn-icon"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span className="nav-btn-text">Learning History</span>
+          </button>
 
-  <span>
-    {currentUser?.full_name || "Student"}
-  </span>
+          <button
+            type="button"
+            className="profile-control-btn"
+            onClick={() => navigate("/student-profile")}
+            title="Profile & Settings"
+            aria-label={`Profile and Settings for ${currentUser?.full_name || "Student"}`}
+          >
+            <span className="profile-avatar" aria-hidden="true">
+              {currentUser?.full_name?.trim()?.charAt(0).toUpperCase() || "U"}
+            </span>
+            <span className="profile-name">
+              {currentUser?.full_name || "Student"}
+            </span>
+          </button>
 
-  <button
-    className="history-button"
-    onClick={() => navigate("/learning-history")}
-    title="View your saved learning activities"
-  >
-    📜 Learning History
-  </button>
-
-  <button
-    className="profile-button"
-    onClick={() => navigate("/student-profile")}
-    title="View & Edit Profile, Change Password"
-  >
-    ⚙️ Profile & Settings
-  </button>
-
-  <button
-    className="logout-button"
-    onClick={handleLogout}
-  >
-    Logout
-  </button>
-</div>
+          <button
+            type="button"
+            className="nav-btn nav-logout-btn"
+            onClick={handleLogout}
+            title="Log out of your account"
+            aria-label="Log out"
+          >
+            <span>Logout</span>
+          </button>
+        </nav>
       </header>
 
       <main className="dashboard">
@@ -492,12 +524,9 @@ const handleRoadmap = async () => {
             </div>
           </div>
         )}
-        <section className="welcome-section">
-          <h2>Welcome back</h2>
-          <p>
-            Track your learning progress, get personalized recommendations,
-            practice with quizzes, and ask your AI tutor for help.
-          </p>
+        <section className="learning-overview-header">
+          <h2>Learning Overview</h2>
+          <p>Track your progress and continue learning.</p>
         </section>
 
         <ProgressDashboard
