@@ -24,7 +24,7 @@
   border: none;
   background: transparent;
 
-  color: #475467;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
 
@@ -76,7 +76,7 @@
 .roadmap-subtitle {
   margin: 6px 0 0;
 
-  color: #667085;
+  color: var(--text-muted);
 
   font-size: 14px;
 }
@@ -107,9 +107,9 @@
   margin: 28px auto 38px;
   padding: 30px 32px;
 
-  background: #ffffff;
+  background: var(--bg-surface);
 
-  border: 1px solid #e4e7ec;
+  border: 1px solid var(--border-color);
   border-radius: 18px;
 
   box-shadow:
@@ -135,7 +135,7 @@
 
   margin: 10px 0 0;
 
-  color: #667085;
+  color: var(--text-muted);
 
   font-size: 14px;
   line-height: 1.65;
@@ -199,7 +199,7 @@
   font-size: 13px;
   font-weight: 800;
 
-  box-shadow: 0 0 0 5px #f5f7fb;
+  box-shadow: 0 0 0 5px var(--bg-app);
 }
 
 /* ================================
@@ -212,9 +212,9 @@
   margin-bottom: 18px;
   padding: 24px 26px;
 
-  background: #ffffff;
+  background: var(--bg-surface);
 
-  border: 1px solid #e4e7ec;
+  border: 1px solid var(--border-color);
   border-radius: 16px;
 
   box-shadow:
@@ -230,7 +230,7 @@
 .roadmap-card:hover {
   transform: translateY(-2px);
 
-  border-color: #c7d7f8;
+  border-color: var(--border-hover);
 
   box-shadow:
     0 8px 20px rgba(16, 24, 40, 0.06),
@@ -313,7 +313,7 @@
 .roadmap-description {
   margin: 17px 0 0;
 
-  color: #475467;
+  color: var(--text-secondary);
 
   font-size: 13px;
   line-height: 1.65;
@@ -338,7 +338,7 @@
 }
 
 .roadmap-status .not-completed {
-  color: #667085;
+  color: var(--text-muted);
 }
 
 /* ================================
@@ -354,9 +354,9 @@
 
   text-align: center;
 
-  background: #ffffff;
+  background: var(--bg-surface);
 
-  border: 1px solid #e4e7ec;
+  border: 1px solid var(--border-color);
   border-radius: 18px;
 
   box-shadow: 0 8px 25px rgba(16, 24, 40, 0.06);
@@ -373,7 +373,7 @@
 }
 
 .roadmap-empty p {
-  color: #667085;
+  color: var(--text-muted);
 
   line-height: 1.5;
 }
@@ -541,8 +541,8 @@
 .roadmap-progress {
   margin: 30px 0;
   padding: 24px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
 }
 
@@ -619,9 +619,9 @@
 }
 
 .badge-not-started {
-  background: #f3f4f6;
-  color: #4b5563;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-surface-elevated, #f3f4f6);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
 }
 
 .roadmap-focus-banner {
@@ -655,7 +655,7 @@
 
 .mastery-disclaimer {
   margin: 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -668,11 +668,11 @@
   display: inline-block;
   font-size: 12px;
   font-weight: 600;
-  color: #475467;
-  background: #f8fafc;
+  color: var(--text-secondary);
+  background: var(--bg-surface-elevated, var(--bg-surface));
   padding: 4px 10px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
 }
 
 .milestone-review-alert {

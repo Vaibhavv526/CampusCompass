@@ -8,7 +8,7 @@
 .back-button {
   border: none;
   background: transparent;
-  color: #334155;
+  color: var(--text-secondary);
   font-size: 14px;
   cursor: pointer;
   padding: 0;
@@ -53,7 +53,7 @@
 
 .skill-analysis-subtitle {
   margin: 6px 0 0;
-  color: #64748b;
+  color: var(--text-muted);
   max-width: 700px;
   line-height: 1.6;
 }
@@ -64,7 +64,7 @@
 }
 
 .skill-input-card > p:not(.eyebrow) {
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 0;
 }
 
@@ -78,7 +78,9 @@
   flex: 1;
   min-width: 0;
   padding: 12px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border, var(--border-color));
+  background: var(--input-bg, var(--bg-surface));
+  color: var(--input-text, var(--text-primary));
   border-radius: 9px;
   font-size: 14px;
   outline: none;
@@ -133,9 +135,10 @@
   gap: 10px;
   margin-top: 18px;
   padding: 14px;
-  background: #f8fafc;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px dashed var(--border-color);
   border-radius: 10px;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .skills-empty-state span {
@@ -152,7 +155,8 @@
 }
 
 .analyze-skills-button:disabled {
-  background: #cbd5e1;
+  background: var(--border-hover, #cbd5e1);
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
@@ -172,7 +176,7 @@
 }
 
 .skill-analysis-results-header > p:last-child {
-  color: #64748b;
+  color: var(--text-muted);
   line-height: 1.6;
   max-width: 850px;
 }
@@ -184,11 +188,12 @@
 }
 
 .analyzed-skill-card {
-  background: #ffffff;
-  border: 1px solid #dbe1ea;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--card-shadow, 0 6px 20px rgba(15, 23, 42, 0.04));
+  color: var(--text-primary);
 }
 
 .analyzed-skill-header {
@@ -214,14 +219,14 @@
 }
 
 .proficiency-score span {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .proficiency-bar {
   width: 100%;
   height: 8px;
-  background: #e2e8f0;
+  background: var(--border-color);
   border-radius: 999px;
   margin-top: 16px;
   overflow: hidden;
@@ -242,7 +247,8 @@
 }
 
 .skill-analysis-columns > div {
-  background: #f8fafc;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 16px;
 }
@@ -255,7 +261,7 @@
 }
 
 .skill-analysis-columns h4 {
-  color: #1e40af;
+  color: var(--accent-text, #2563eb);
 }
 
 .skill-analysis-columns ul,
@@ -266,7 +272,7 @@
 
 .skill-analysis-columns li,
 .next-steps-section li {
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.6;
   margin-bottom: 6px;
@@ -275,13 +281,14 @@
 .skill-gap-section {
   margin-top: 18px;
   padding: 16px;
-  background: #f8fafc;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   border-radius: 12px;
 }
 
 .skill-gap-section p {
   margin: 0;
-  color: #475569;
+  color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -289,11 +296,11 @@
 .next-steps-section {
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
 }
 
 .next-steps-section h4 {
-  color: #1e40af;
+  color: var(--accent-text, #2563eb);
 }
 
 .skill-analysis-error {
@@ -343,10 +350,11 @@
 }
 
 .skill-input-card {
-  background: #f8fafc;
-  border: 1px solid #dbe1ea;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 20px;
+  box-shadow: var(--card-shadow);
 }
 
 .skill-input-card-header {
@@ -359,7 +367,7 @@
 .skill-input-card-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .remove-skill-button {
@@ -388,7 +396,7 @@
 .skill-field label {
   display: block;
   margin-bottom: 8px;
-  color: #334155;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -400,14 +408,21 @@
 }
 
 .proficiency-option {
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #475569;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
   padding: 8px 13px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.proficiency-option:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
 }
 
 .proficiency-option:hover {
@@ -427,14 +442,19 @@
   box-sizing: border-box;
   resize: vertical;
   padding: 11px 13px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border, var(--border-color));
   border-radius: 9px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--input-bg, var(--bg-surface));
+  color: var(--input-text, var(--text-primary));
   font-family: inherit;
   font-size: 14px;
   line-height: 1.5;
   outline: none;
+}
+
+.skill-field textarea:focus {
+  border-color: var(--input-focus-border, var(--accent-primary));
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
 }
 
 .skill-field textarea:focus {

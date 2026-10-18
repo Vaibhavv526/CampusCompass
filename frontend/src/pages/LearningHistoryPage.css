@@ -43,17 +43,17 @@
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  background: #ffffff;
-  border: 1px solid #e4e7ec;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.05);
+  box-shadow: var(--card-shadow);
 }
 
 .history-header-content h1 {
   margin: 4px 0 6px;
   font-size: 26px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .history-eyebrow {
@@ -94,16 +94,16 @@
   font-size: 13px;
   font-weight: 600;
   border-radius: 20px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #475467;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .filter-pill:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
 }
 
 .filter-pill.active {
@@ -118,16 +118,16 @@
   font-size: 13px;
   font-weight: 600;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #475467;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .refresh-button:hover:not(:disabled) {
-  background: #f8fafc;
-  color: #1e293b;
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
 }
 
 .refresh-button:disabled {
@@ -198,8 +198,8 @@
   margin: 60px auto;
   padding: 42px 32px;
   text-align: center;
-  background: #ffffff;
-  border: 1px solid #e4e7ec;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 18px;
   box-shadow: 0 8px 25px rgba(16, 24, 40, 0.05);
 }
@@ -212,7 +212,7 @@
 .history-empty-card h2 {
   margin: 0 0 8px;
   font-size: 22px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .history-empty-card p {
@@ -241,9 +241,9 @@
 
 .empty-actions-row .secondary-button {
   padding: 10px 18px;
-  background: #ffffff;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+  background: var(--btn-secondary-bg, var(--bg-surface));
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -260,11 +260,11 @@
 }
 
 .history-activity-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -320,9 +320,9 @@
 }
 
 .badge-generic {
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  color: #334155;
+  background: var(--bg-surface-elevated, #f1f5f9);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
 
 .activity-timestamp {
@@ -335,7 +335,7 @@
   margin: 0 0 8px;
   font-size: 17px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
   line-height: 1.35;
 }
 
@@ -418,9 +418,9 @@
 
 .load-more-button {
   padding: 10px 24px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #334155;
+  background: var(--btn-secondary-bg, var(--bg-surface));
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -429,8 +429,9 @@
 }
 
 .load-more-button:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #94a3b8;
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .load-more-button:disabled {
@@ -455,14 +456,15 @@
 }
 
 .history-modal-card {
-  background: #ffffff;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   max-width: 760px;
   width: 100%;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+  box-shadow: var(--card-shadow-hover);
   overflow: hidden;
   animation: modalFadeIn 0.2s ease-out;
 }
@@ -509,8 +511,8 @@
 }
 
 .modal-close-button:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
 }
 
 .modal-title {
@@ -518,7 +520,7 @@
   padding: 16px 24px 8px;
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .modal-refreshing-hint {
@@ -538,11 +540,12 @@
 .modal-summary-box {
   margin: 0 24px 12px;
   padding: 10px 14px;
-  background: #f8fafc;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 13px;
-  color: #334155;
-  border-left: 3px solid #2563eb;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--accent-primary);
 }
 
 .modal-body-content {
@@ -561,9 +564,9 @@
 
 .modal-secondary-button {
   padding: 8px 18px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #334155;
+  background: var(--btn-secondary-bg, var(--bg-surface));
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -609,15 +612,15 @@
 .quiz-questions-review h4 {
   margin: 0 0 12px;
   font-size: 15px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .quiz-feedback-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 12px;
-  background: #ffffff;
+  background: var(--bg-surface);
 }
 
 .quiz-feedback-card.correct {
@@ -645,7 +648,7 @@
 .question-text {
   font-weight: 600;
   font-size: 14px;
-  color: #1e293b;
+  color: var(--text-primary);
   flex-grow: 1;
 }
 
@@ -680,9 +683,9 @@
 
 .explanation-text {
   font-size: 12px;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 6px 0 0;
-  background: #f8fafc;
+  background: var(--bg-surface-elevated, var(--bg-surface));
   padding: 6px 10px;
   border-radius: 6px;
 }
@@ -690,8 +693,8 @@
 /* Assessment Details */
 .assessment-overview-card {
   padding: 14px 18px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   margin-bottom: 20px;
 }
@@ -699,20 +702,20 @@
 .assessment-overview-card h4 {
   margin: 0 0 6px;
   font-size: 14px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .assessment-overview-card p {
   margin: 0;
   font-size: 13px;
-  color: #334155;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 .skill-gaps-section h4 {
   margin: 0 0 12px;
   font-size: 15px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .skill-gaps-list {
@@ -723,10 +726,10 @@
 }
 
 .skill-gap-item {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 14px;
-  background: #ffffff;
+  background: var(--bg-surface);
 }
 
 .skill-gap-header {
@@ -738,7 +741,7 @@
 
 .skill-gap-header strong {
   font-size: 15px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .priority-badge {
@@ -779,7 +782,7 @@
 
 .level-track {
   height: 8px;
-  background: #e2e8f0;
+  background: var(--border-color);
   border-radius: 4px;
   margin-top: 4px;
   overflow: hidden;
@@ -806,7 +809,7 @@
 .recommendations-section h4 {
   margin: 0 0 12px;
   font-size: 15px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .recommendations-list {
@@ -816,10 +819,10 @@
 }
 
 .recommendation-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 14px;
-  background: #f8fafc;
+  background: var(--bg-surface-elevated, var(--bg-surface));
 }
 
 .recommendation-card h5 {
@@ -831,7 +834,7 @@
 .recommendation-card p {
   margin: 4px 0;
   font-size: 13px;
-  color: #334155;
+  color: var(--text-secondary);
   line-height: 1.45;
 }
 
@@ -869,15 +872,15 @@
 .roadmap-milestones-list h4 {
   margin: 0 0 12px;
   font-size: 15px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .milestone-item {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 14px;
   margin-bottom: 12px;
-  background: #ffffff;
+  background: var(--bg-surface);
 }
 
 .milestone-item.completed {
@@ -904,7 +907,7 @@
 .milestone-title {
   font-weight: 700;
   font-size: 14px;
-  color: #0f172a;
+  color: var(--text-primary);
   flex-grow: 1;
 }
 
@@ -940,8 +943,9 @@
 }
 
 .skill-chip {
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--bg-surface-elevated, #f1f5f9);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 6px;
@@ -955,9 +959,10 @@
 
 .milestone-resources {
   font-size: 12px;
-  color: #475467;
+  color: var(--text-secondary);
   margin-top: 6px;
-  background: #f8fafc;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   padding: 8px 12px;
   border-radius: 6px;
 }

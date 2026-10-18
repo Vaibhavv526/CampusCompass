@@ -37,13 +37,13 @@
 
 .auth-header h1 {
   margin: 0;
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 28px;
 }
 
 .auth-header p {
   margin-top: 8px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -62,14 +62,16 @@
 .auth-field label {
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-secondary);
 }
 
 .auth-field input {
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border, var(--border-color));
+  background: var(--input-bg, var(--bg-surface));
+  color: var(--input-text, var(--text-primary));
   border-radius: 10px;
   font-size: 15px;
   outline: none;
@@ -128,7 +130,7 @@
 .auth-switch {
   margin-top: 24px;
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 14px;
 }
 
@@ -173,7 +175,7 @@
 .profile-tabs {
   display: flex;
   gap: 8px;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border-color);
   margin-bottom: 24px;
 }
 
@@ -184,7 +186,7 @@
   background: none;
   font-size: 14px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
@@ -205,8 +207,8 @@
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   margin-bottom: 20px;
 }
@@ -228,13 +230,13 @@
 .profile-name-title {
   margin: 0;
   font-size: 18px;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .profile-email-sub {
   margin: 2px 0 0;
   font-size: 13px;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .profile-details-grid {
@@ -245,8 +247,8 @@
 
 .detail-item {
   padding: 12px 14px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--bg-surface-elevated, var(--bg-surface));
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -260,7 +262,7 @@
 .detail-label {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -268,7 +270,7 @@
 .detail-value {
   font-size: 14px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .detail-value.highlight {
@@ -289,11 +291,11 @@
 
 .profile-cancel-button {
   flex: 1;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 13px;
-  background: #ffffff;
-  color: #475569;
+  background: var(--btn-secondary-bg, var(--bg-surface));
+  color: var(--text-secondary);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -301,8 +303,9 @@
 }
 
 .profile-cancel-button:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: var(--bg-surface-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .password-input-wrapper {
@@ -320,7 +323,7 @@
   right: 10px;
   border: none;
   background: none;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
