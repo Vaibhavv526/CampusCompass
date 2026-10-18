@@ -235,16 +235,16 @@ function QuizPage() {
                     style={{
                       background:
                         answers[index] === option
-                          ? "#2563eb"
-                          : "#ffffff",
+                          ? "var(--accent-primary)"
+                          : "var(--bg-surface)",
                       color:
                         answers[index] === option
                           ? "#ffffff"
-                          : "#111827",
+                          : "var(--text-primary)",
                       border:
                         answers[index] === option
-                          ? "2px solid #2563eb"
-                          : "1px solid #d1d5db",
+                          ? "2px solid var(--accent-primary)"
+                          : "1px solid var(--border-color)",
                     }}
                     onClick={() => {
                       const updatedAnswers = [...answers];

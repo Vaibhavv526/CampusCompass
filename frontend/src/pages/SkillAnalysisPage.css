@@ -1,8 +1,8 @@
 .skill-analysis-page {
   min-height: 100vh;
-  background: #f5f7fb;
+  background: var(--bg-app);
   padding: 28px 8%;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .back-button {

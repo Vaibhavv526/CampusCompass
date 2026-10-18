@@ -4,16 +4,17 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #f5f7fb;
+  background: var(--bg-app);
 }
 
 .auth-card {
   width: 100%;
   max-width: 440px;
-  background: #ffffff;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 18px;
   padding: 40px;
-  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .auth-header {

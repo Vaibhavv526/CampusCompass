@@ -2,11 +2,169 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Surface & backgrounds */
+  --bg-app: #f8fafc;
+  --bg-page-alt: #f5f7fb;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-surface-elevated: #ffffff;
+  --bg-surface-muted: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+
+  /* Typography */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-placeholder: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* Borders */
+  --border-color: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --border-hover: #cbd5e1;
+  --border-card: #e2e8f0;
+
+  /* Accent & interactive */
+  --accent-primary: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-subtle: #eff6ff;
+  --accent-border: #bfdbfe;
+  --accent-text: #2563eb;
+
+  /* Form controls */
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --input-text: #0f172a;
+  --input-placeholder: #94a3b8;
+  --input-focus-border: #2563eb;
+  --input-focus-ring: rgba(37, 99, 235, 0.15);
+
+  /* Buttons */
+  --btn-secondary-bg: #ffffff;
+  --btn-secondary-border: #e2e8f0;
+  --btn-secondary-text: #334155;
+  --btn-secondary-hover-bg: #f8fafc;
+
+  /* Elevation & Shadows */
+  --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --card-shadow-hover: 0 4px 14px rgba(15, 23, 42, 0.08);
+  --modal-overlay: rgba(15, 23, 42, 0.55);
+  --modal-bg: #ffffff;
+
+  /* Status tokens */
+  --status-success-bg: #ecfdf5;
+  --status-success-text: #065f46;
+  --status-success-border: #a7f3d0;
+  --status-warning-bg: #fffbeb;
+  --status-warning-text: #92400e;
+  --status-warning-border: #fde68a;
+  --status-error-bg: #fef2f2;
+  --status-error-text: #991b1b;
+  --status-error-border: #fecaca;
+  --status-info-bg: #eff6ff;
+  --status-info-text: #1e40af;
+  --status-info-border: #bfdbfe;
+
+  /* Chat / Tutor specific */
+  --tutor-user-bubble-bg: #eff6ff;
+  --tutor-user-bubble-text: #1e40af;
+  --tutor-user-bubble-border: #bfdbfe;
+  --tutor-assistant-bubble-bg: #ffffff;
+  --tutor-assistant-bubble-text: #0f172a;
+  --tutor-assistant-bubble-border: #e2e8f0;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-track: #f1f5f9;
+}
+
+[data-theme="dark"] {
+  /* Surface & backgrounds */
+  --bg-app: #0b0f19;
+  --bg-page-alt: #0b0f19;
+  --bg-surface: #131c2e;
+  --bg-surface-hover: #1b263b;
+  --bg-surface-elevated: #182236;
+  --bg-surface-muted: #0f172a;
+  --bg-card: #131c2e;
+  --bg-card-hover: #182236;
+
+  /* Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-placeholder: #475569;
+  --text-inverse: #0b0f19;
+
+  /* Borders */
+  --border-color: #23314d;
+  --border-subtle: #182236;
+  --border-hover: #334155;
+  --border-card: #23314d;
+
+  /* Accent & interactive */
+  --accent-primary: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-subtle: rgba(59, 130, 246, 0.16);
+  --accent-border: rgba(59, 130, 246, 0.35);
+  --accent-text: #60a5fa;
+
+  /* Form controls */
+  --input-bg: #0d1424;
+  --input-border: #293856;
+  --input-text: #f8fafc;
+  --input-placeholder: #64748b;
+  --input-focus-border: #3b82f6;
+  --input-focus-ring: rgba(59, 130, 246, 0.25);
+
+  /* Buttons */
+  --btn-secondary-bg: #131c2e;
+  --btn-secondary-border: #23314d;
+  --btn-secondary-text: #cbd5e1;
+  --btn-secondary-hover-bg: #1b263b;
+
+  /* Elevation & Shadows */
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --modal-overlay: rgba(3, 7, 18, 0.78);
+  --modal-bg: #131c2e;
+
+  /* Status tokens */
+  --status-success-bg: rgba(16, 185, 129, 0.14);
+  --status-success-text: #34d399;
+  --status-success-border: rgba(16, 185, 129, 0.32);
+  --status-warning-bg: rgba(245, 158, 11, 0.14);
+  --status-warning-text: #fbbf24;
+  --status-warning-border: rgba(245, 158, 11, 0.32);
+  --status-error-bg: rgba(239, 68, 68, 0.14);
+  --status-error-text: #f87171;
+  --status-error-border: rgba(239, 68, 68, 0.32);
+  --status-info-bg: rgba(59, 130, 246, 0.14);
+  --status-info-text: #93c5fd;
+  --status-info-border: rgba(59, 130, 246, 0.32);
+
+  /* Chat / Tutor specific */
+  --tutor-user-bubble-bg: rgba(59, 130, 246, 0.18);
+  --tutor-user-bubble-text: #bfdbfe;
+  --tutor-user-bubble-border: rgba(59, 130, 246, 0.35);
+  --tutor-assistant-bubble-bg: #182236;
+  --tutor-assistant-bubble-text: #f8fafc;
+  --tutor-assistant-bubble-border: #23314d;
+
+  /* Scrollbar */
+  --scrollbar-thumb: #23314d;
+  --scrollbar-track: #0b0f19;
+}
+
 html,
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
   font-family:
     Inter,
     system-ui,
@@ -14,4 +172,42 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Accessible focus states */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation-duration: 0.001s !important;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
 }

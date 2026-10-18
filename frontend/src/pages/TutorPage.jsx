@@ -196,7 +196,7 @@ function TutorPage() {
       )}
 
       {historyNotice && (
-        <div className="tutor-error" style={{ backgroundColor: "#fef3c7", color: "#92400e", borderColor: "#fde68a" }}>
+        <div className="tutor-error" style={{ backgroundColor: "var(--status-warning-bg)", color: "var(--status-warning-text)", borderColor: "var(--status-warning-border)" }}>
           ⚠️ {historyNotice}
         </div>
       )}
@@ -266,9 +266,9 @@ function TutorPage() {
               className="tutor-action-btn tutor-roadmap-btn"
               onClick={() => navigate("/roadmap")}
               style={{
-                backgroundColor: "#f3f4f6",
-                color: "#374151",
-                border: "1px solid #d1d5db",
+                backgroundColor: "var(--btn-secondary-bg)",
+                color: "var(--btn-secondary-text)",
+                border: "1px solid var(--btn-secondary-border)",
                 borderRadius: "8px",
                 padding: "10px 18px",
                 fontWeight: 600,

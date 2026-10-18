@@ -1,6 +1,7 @@
 .tutor-page {
   min-height: 100vh;
-  background: #f5f7fb;
+  background: var(--bg-app);
+  color: var(--text-primary);
   padding: 24px;
 }
 
@@ -23,7 +24,8 @@
 
 .tutor-icon {
   font-size: 28px;
-  background: #eef4ff;
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
   border-radius: 50%;
   padding: 10px;
 }
@@ -31,11 +33,11 @@
 .tutor-header h1 {
   margin: 6px 0;
   font-size: 32px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .tutor-subtitle {
-  color: #64748b;
+  color: var(--text-secondary);
   line-height: 1.6;
   max-width: 700px;
 }
@@ -52,17 +54,18 @@
 .tutor-results {
   max-width: 900px;
   margin: 0 auto 30px;
-  background: white;
-  border: 1px solid #dbe2ea;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 28px;
   box-sizing: border-box;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--card-shadow);
+  color: var(--text-primary);
 }
 
 .tutor-input-card h2 {
   margin: 8px 0;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .tutor-field {
@@ -73,7 +76,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
 }
 
 .tutor-field input,
@@ -81,7 +84,9 @@
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--input-text);
   border-radius: 8px;
   font-size: 14px;
   font-family: inherit;
@@ -90,7 +95,8 @@
 
 .tutor-field input:focus,
 .tutor-field textarea:focus {
-  border-color: #2563eb;
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
 }
 
 .tutor-field textarea {
@@ -120,8 +126,9 @@
   padding: 12px;
   box-sizing: border-box;
   border-radius: 8px;
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--status-error-bg);
+  color: var(--status-error-text);
+  border: 1px solid var(--status-error-border);
 }
 
 .tutor-results-header {
@@ -130,22 +137,22 @@
 
 .tutor-results-header h2 {
   margin-top: 8px;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .tutor-section {
   padding: 20px 0;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
 }
 
 .tutor-section h3 {
-  color: #1e3a8a;
+  color: var(--accent-primary);
   margin-top: 0;
 }
 
 .tutor-section p,
 .tutor-section li {
-  color: #475569;
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 

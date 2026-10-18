@@ -45,6 +45,28 @@ function App() {
   const [progress, setProgress] = useState(null);
   const [progressLoading, setProgressLoading] = useState(false);
   const [progressError, setProgressError] = useState("");
+
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem("campuscompass-theme");
+      return saved === "dark" || saved === "light" ? saved : "light";
+    } catch {
+      return "light";
+    }
+  });
+
+  useEffect(() => {
+    try {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("campuscompass-theme", theme);
+    } catch (e) {
+      console.warn("Failed to persist theme preference:", e);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
 const navigate = useNavigate();
 const location = useLocation();
 
@@ -424,6 +446,18 @@ const handleRoadmap = async () => {
 
           <button
             type="button"
+            className="nav-btn nav-theme-toggle"
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            <span className="nav-btn-text">
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
+            </span>
+          </button>
+
+          <button
+            type="button"
             className="profile-control-btn"
             onClick={() => navigate("/student-profile")}
             title="Profile & Settings"
@@ -566,9 +600,9 @@ const handleRoadmap = async () => {
                   onClick={handleAssessment}
                   disabled={assessmentLoading}
                   style={{
-                    backgroundColor: "#f3f4f6",
-                    color: "#374151",
-                    border: "1px solid #d1d5db",
+                    backgroundColor: "var(--btn-secondary-bg)",
+                    color: "var(--btn-secondary-text)",
+                    border: "1px solid var(--btn-secondary-border)",
                   }}
                 >
                   {assessmentLoading ? "Generating..." : "Retake Assessment"}
@@ -655,7 +689,7 @@ const handleRoadmap = async () => {
           </div>
         )}
         {historyWarning && (
-          <div className="assessment-error" style={{ backgroundColor: "#fef3c7", color: "#92400e", borderColor: "#fde68a" }}>
+          <div className="assessment-error" style={{ backgroundColor: "var(--status-warning-bg)", color: "var(--status-warning-text)", borderColor: "var(--status-warning-border)" }}>
             ⚠️ {historyWarning}
           </div>
         )}

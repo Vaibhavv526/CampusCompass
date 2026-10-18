@@ -4,8 +4,8 @@
 
 .learning-history-page {
   min-height: 100vh;
-  background: #f5f7fb;
-  color: #101828;
+  background: var(--bg-app);
+  color: var(--text-primary);
   padding: 28px 24px 80px;
 }
 
@@ -68,7 +68,7 @@
 .history-subtitle {
   margin: 0;
   font-size: 14px;
-  color: #475467;
+  color: var(--text-secondary);
 }
 
 /* Filters bar */

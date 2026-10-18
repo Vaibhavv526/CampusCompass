@@ -369,9 +369,9 @@ function AssessmentPage() {
               className="back-dashboard-btn"
               onClick={() => navigate("/")}
               style={{
-                backgroundColor: "#ffffff",
-                color: "#101828",
-                border: "none",
+                backgroundColor: "var(--bg-surface)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-color)",
                 borderRadius: "8px",
                 padding: "12px 20px",
                 fontWeight: 600,

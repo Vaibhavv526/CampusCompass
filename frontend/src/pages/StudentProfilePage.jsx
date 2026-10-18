@@ -223,7 +223,7 @@ function StudentProfilePage() {
         <div className="auth-card" style={{ maxWidth: "560px", textAlign: "center" }}>
           <div className="auth-logo">🎓</div>
           <h2>Loading Profile...</h2>
-          <p style={{ color: "#64748b" }}>Fetching your campus records...</p>
+          <p style={{ color: "var(--text-secondary)" }}>Fetching your campus records...</p>
         </div>
       </div>
     );
@@ -358,7 +358,7 @@ function StudentProfilePage() {
                   <input
                     value={currentUser?.email || ""}
                     disabled
-                    style={{ background: "#f8fafc", color: "#64748b", cursor: "not-allowed" }}
+                    style={{ background: "var(--bg-surface-hover)", color: "var(--text-muted)", cursor: "not-allowed" }}
                   />
                 </div>
 

@@ -4,8 +4,8 @@
 
 .roadmap-page {
   min-height: 100vh;
-  background: #f5f7fb;
-  color: #101828;
+  background: var(--bg-app);
+  color: var(--text-primary);
   padding: 28px 24px 70px;
 }
 
